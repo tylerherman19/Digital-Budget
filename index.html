@@ -276,11 +276,10 @@
       GOOGLE_SEARCH_BUDGET: 2,  // C
       GOOGLE_CUM_ACTUAL: 3,   // D
       META_CUM_ACTUAL: 4,     // E
-      META_CURRENT_SPEND: 7,  // H (totals row current Meta spend)
-      GOOGLE_CURRENT_SPEND: 8,// I (totals row current Google spend)
       META_VOTER_FILE: 9,     // J
       META_BOOSTED: 10,       // K
       DSPOLITICAL: 11,        // L
+      DSP_TOTAL_SPEND: 12,    // M (totals row total DSPolitical spend)
       DAILY_TOTAL_BUDGET: 13, // N
       RUNNING_BUDGET: 15,     // P
       WEEKLY_BURN: 17,        // R
@@ -297,11 +296,10 @@
           googleSearchBudget: parseMoney(r[COL.GOOGLE_SEARCH_BUDGET]),
           googleCum: parseMoney(r[COL.GOOGLE_CUM_ACTUAL]), // D cumulative
           metaCum: parseMoney(r[COL.META_CUM_ACTUAL]),   // E cumulative
-          metaCurrentSpend: parseMoney(r[COL.META_CURRENT_SPEND]), // H
-          googleCurrentSpend: parseMoney(r[COL.GOOGLE_CURRENT_SPEND]), // I
           metaVoterFile: parseMoney(r[COL.META_VOTER_FILE]), // J
           metaBoosted: parseMoney(r[COL.META_BOOSTED]),  // K
           dspCommitment: parseMoney(r[COL.DSPOLITICAL]), // L
+          dspTotalSpend: parseMoney(r[COL.DSP_TOTAL_SPEND]), // M
           dailyTotalBudget: parseMoney(r[COL.DAILY_TOTAL_BUDGET]), // N
           runningBudget: parseMoney(r[COL.RUNNING_BUDGET]), // P
           weeklyBurn: parseMoney(r[COL.WEEKLY_BURN]), // R
@@ -347,7 +345,8 @@
       const plannedToDate = toDateRows.length ? toDateRows[toDateRows.length - 1].runningBudget : 0;
       const googleMetaActualToDate = toDateRows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
       const paidDSPToDate = computePaidDSP(campaignRows, todayDate);
-      const actualToDate = (totalsRow.googleCurrentSpend + totalsRow.metaCurrentSpend) || (googleMetaActualToDate + paidDSPToDate);
+      const totalsRowActualToDate = totalsRow.googleCum + totalsRow.metaCum + totalsRow.dspTotalSpend;
+      const actualToDate = totalsRowActualToDate || (googleMetaActualToDate + paidDSPToDate);
 
       const paceDelta = actualToDate - plannedToDate;
       const paceDeltaPct = plannedToDate ? (paceDelta / plannedToDate) * 100 : 0;
@@ -385,9 +384,9 @@
 
       const tbody = $('channelBody');
       tbody.innerHTML = '';
-      const googleSpent = totalsRow.googleCurrentSpend || (toDateRows.length ? toDateRows[toDateRows.length - 1].googleCum : 0);
-      const metaSpent = totalsRow.metaCurrentSpend || (toDateRows.length ? toDateRows[toDateRows.length - 1].metaCum : 0);
-      const toDateDSP = computePaidDSP(campaignRows, todayDate);
+      const googleSpent = totalsRow.googleCum || (toDateRows.length ? toDateRows[toDateRows.length - 1].googleCum : 0);
+      const metaSpent = totalsRow.metaCum || (toDateRows.length ? toDateRows[toDateRows.length - 1].metaCum : 0);
+      const toDateDSP = totalsRow.dspTotalSpend || computePaidDSP(campaignRows, todayDate);
       const googleAllocated = totalsRow.googleDisplayBudget + totalsRow.googleSearchBudget;
       const metaAllocated = totalsRow.metaVoterFile + totalsRow.metaBoosted;
 
