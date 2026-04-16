@@ -176,7 +176,7 @@
   <script>
     const CLIENT_ID = '1023469996726-hlpc7lc2ducddp8q286m53tp0qsti3op.apps.googleusercontent.com';
     const SHEET_ID = '1gHPmpRQxXCtBCB6AkXVljv1VRa1m6W5YV_Q34fevF0Q';
-    const RANGE = 'Tracker!A2:Z82';
+    const RANGE = 'Tracker!A2:S82';
     const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/userinfo.email';
 
     let tokenClient;
@@ -253,17 +253,42 @@
       }
     }
 
+    const COL = {
+      DATE: 0,                // A
+      GOOGLE_DISPLAY_BUDGET: 1, // B
+      GOOGLE_SEARCH_BUDGET: 2,  // C
+      GOOGLE_CUM_ACTUAL: 3,   // D
+      META_CUM_ACTUAL: 4,     // E
+      META_TOTAL: 7,          // H
+      META_REACH: 8,          // I
+      META_VOTER_FILE: 9,     // J
+      META_BOOSTED: 10,       // K
+      DSPOLITICAL: 11,        // L
+      DAILY_TOTAL_BUDGET: 13, // N
+      RUNNING_BUDGET: 15,     // P
+      WEEKLY_BUDGET: 17,      // R
+      WEEKLY_ACTUAL: 18       // S
+    };
+
     function deriveRows(values) {
       const rows = values.map((r, idx) => {
         const sheetRow = idx + 2;
         return {
           sheetRow,
-          date: parseDate(r[0]),
-          googleCum: parseMoney(r[3]), // D cumulative
-          metaCum: parseMoney(r[4]),   // E cumulative
-          dspCommitment: parseMoney(r[11]), // L
-          plannedCurve: parseMoney(r[15]), // P
-          totalBudgetMarker: parseMoney(r[13]), // N
+          date: parseDate(r[COL.DATE]),
+          googleDisplayBudget: parseMoney(r[COL.GOOGLE_DISPLAY_BUDGET]),
+          googleSearchBudget: parseMoney(r[COL.GOOGLE_SEARCH_BUDGET]),
+          googleCum: parseMoney(r[COL.GOOGLE_CUM_ACTUAL]), // D cumulative
+          metaCum: parseMoney(r[COL.META_CUM_ACTUAL]),   // E cumulative
+          metaTotal: parseMoney(r[COL.META_TOTAL]),      // H
+          metaReach: parseMoney(r[COL.META_REACH]),      // I
+          metaVoterFile: parseMoney(r[COL.META_VOTER_FILE]), // J
+          metaBoosted: parseMoney(r[COL.META_BOOSTED]),  // K
+          dspCommitment: parseMoney(r[COL.DSPOLITICAL]), // L
+          dailyTotalBudget: parseMoney(r[COL.DAILY_TOTAL_BUDGET]), // N
+          runningBudget: parseMoney(r[COL.RUNNING_BUDGET]), // P
+          weeklyBudget: parseMoney(r[COL.WEEKLY_BUDGET]), // R
+          weeklyActual: parseMoney(r[COL.WEEKLY_ACTUAL]), // S
           raw: r
         };
       });
@@ -302,7 +327,7 @@
       const firstDay = campaignRows.length ? campaignRows[0].date : null;
 
       const toDateRows = campaignRows.filter(r => r.date <= todayDate);
-      const plannedToDate = toDateRows.length ? toDateRows[toDateRows.length - 1].plannedCurve : 0;
+      const plannedToDate = toDateRows.length ? toDateRows[toDateRows.length - 1].runningBudget : 0;
       const googleMetaActualToDate = toDateRows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
       const paidDSPToDate = computePaidDSP(campaignRows, todayDate);
       const actualToDate = googleMetaActualToDate + paidDSPToDate;
@@ -327,7 +352,7 @@
       const daysToPrimary = primary ? Math.max(0, daysBetween(todayDate, primary)) : 0;
       const elapsedPct = totalDays ? (elapsedDays / totalDays) * 100 : 0;
 
-      const totalBudget = totalsRow.totalBudgetMarker;
+      const totalBudget = totalsRow.dailyTotalBudget;
       const budgetSpentPct = totalBudget ? (actualToDate / totalBudget) * 100 : 0;
 
       $('primaryDate').textContent = toISO(primary);
@@ -365,19 +390,25 @@
       $('lastIncreaseDate').textContent = toISO(lastIncDate);
       $('daysSinceUpdate').textContent = daysSince === null ? '-' : daysSince;
 
-      const channelConfigs = [
-        { name: 'Google Display', allocIdx: 16, spentIdx: 17 },
-        { name: 'Google Search', allocIdx: 18, spentIdx: 19 },
-        { name: 'Meta Reach', allocIdx: 20, spentIdx: 21 },
-        { name: 'Meta Voter File', allocIdx: 22, spentIdx: 23 },
-        { name: 'DSPolitical', allocIdx: 24, spentIdx: 25 }
-      ];
-
       const tbody = $('channelBody');
       tbody.innerHTML = '';
-      channelConfigs.forEach(c => {
-        const allocated = parseMoney(totalsRow.raw[c.allocIdx]);
-        const spent = parseMoney(totalsRow.raw[c.spentIdx]);
+      const toDateGoogleDisplay = toDateRows.reduce((sum, row) => sum + row.googleDisplayBudget, 0);
+      const toDateGoogleSearch = toDateRows.reduce((sum, row) => sum + row.googleSearchBudget, 0);
+      const toDateMetaReach = toDateRows.reduce((sum, row) => sum + row.metaReach, 0);
+      const toDateMetaVoterFile = toDateRows.reduce((sum, row) => sum + row.metaVoterFile, 0);
+      const toDateDSP = computePaidDSP(campaignRows, todayDate);
+
+      const channelRows = [
+        { name: 'Google Display', allocated: totalsRow.googleDisplayBudget, spent: toDateGoogleDisplay },
+        { name: 'Google Search', allocated: totalsRow.googleSearchBudget, spent: toDateGoogleSearch },
+        { name: 'Meta Reach', allocated: totalsRow.metaReach, spent: toDateMetaReach },
+        { name: 'Meta Voter File', allocated: totalsRow.metaVoterFile, spent: toDateMetaVoterFile },
+        { name: 'DSPolitical', allocated: totalsRow.dspCommitment, spent: toDateDSP }
+      ];
+
+      channelRows.forEach(c => {
+        const allocated = c.allocated;
+        const spent = c.spent;
         const remaining = allocated - spent;
         const used = allocated ? (spent / allocated) * 100 : 0;
         const tr = document.createElement('tr');
