@@ -8,21 +8,22 @@
   <script src="https://apis.google.com/js/api.js" async defer></script>
   <style>
     :root {
-      --bg: #0f172a;
-      --card: #111827;
-      --muted: #94a3b8;
-      --text: #e2e8f0;
-      --good: #22c55e;
+      --bg: #f2f1ed;
+      --card: #e6e3dd;
+      --muted: #6b6b6b;
+      --text: #111111;
+      --good: #2f6b2f;
       --warn: #f59e0b;
       --bad: #ef4444;
-      --border: #1f2937;
-      --accent: #38bdf8;
+      --border: #d2d0ca;
+      --accent: #3b84cf;
+      --bar: #c6c6c6;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: linear-gradient(160deg, #020617, #0b1020 55%, #111827);
+      background: var(--bg);
       color: var(--text);
     }
     .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 80px; }
@@ -34,7 +35,7 @@
     .muted { color: var(--muted); }
     button {
       border: 1px solid var(--border);
-      background: #0b1224;
+      background: #ffffff;
       color: var(--text);
       padding: 10px 14px;
       border-radius: 10px;
@@ -47,14 +48,13 @@
       gap: 12px;
     }
     .card {
-      background: rgba(17, 24, 39, 0.82);
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 14px;
-      backdrop-filter: blur(5px);
+      padding: 22px;
     }
-    .card h2 { margin: 0 0 10px; font-size: 1rem; }
-    .stat { font-size: 1.25rem; font-weight: 700; margin: 4px 0; }
+    .card h2 { margin: 0 0 8px; font-size: 2.5rem; line-height: 1.1; }
+    .stat { font-size: 3rem; font-weight: 700; margin: 6px 0; }
     .good { color: var(--good); }
     .warn { color: var(--warn); }
     .bad { color: var(--bad); }
@@ -73,6 +73,20 @@
       font-size: 0.9rem;
     }
     th:first-child, td:first-child { text-align: left; }
+    .bar {
+      width: 100%;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--bar);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: inherit;
+    }
     .hidden { display: none; }
     .error {
       margin-top: 12px;
@@ -100,50 +114,53 @@
     <div id="dashboard" class="hidden">
       <div class="grid">
         <section class="card">
-          <h2>Pacing</h2>
-          <div id="pacingStatus" class="stat">-</div>
+          <h2>Total budget</h2>
+          <div id="totalBudgetCard" class="stat">$0</div>
           <div class="kvs">
-            <span class="muted">Planned to date (P)</span><span id="plannedToDate">$0</span>
-            <span class="muted">Actual to date</span><span id="actualToDate">$0</span>
-            <span class="muted">Delta ($)</span><span id="pacingDelta">$0</span>
-            <span class="muted">Delta (%)</span><span id="pacingDeltaPct">0%</span>
+            <span class="muted">Full campaign</span><span id="campaignLabel">Budget plan</span>
           </div>
         </section>
 
         <section class="card">
-          <h2>Campaign Clock</h2>
+          <h2>Total spent</h2>
+          <div id="actualToDate" class="stat">$0</div>
           <div class="kvs">
-            <span class="muted">Primary date</span><span id="primaryDate">-</span>
-            <span class="muted">Total campaign days</span><span id="totalDays">0</span>
-            <span class="muted">Days elapsed</span><span id="daysElapsed">0</span>
-            <span class="muted">% elapsed</span><span id="pctElapsed">0%</span>
-            <span class="muted">Days to primary</span><span id="daysToPrimary">0</span>
-            <span class="muted">% budget spent</span><span id="pctBudgetSpent">0%</span>
+            <span class="muted">Budget used</span><span id="pacingDeltaPct">0%</span>
           </div>
         </section>
 
         <section class="card">
-          <h2>Projected Final Spend</h2>
-          <div id="projectionHeadline" class="stat">$0</div>
+          <h2>This week</h2>
+          <div id="thisWeekCard" class="stat">$0</div>
           <div class="kvs">
-            <span class="muted">7-day avg (Google+Meta)</span><span id="rollingAvg">$0</span>
-            <span class="muted">Projected at primary</span><span id="projectedFinal">$0</span>
-            <span class="muted">Compared to total budget (N82)</span><span id="projectionDelta">$0</span>
+            <span class="muted">Current week actual (S)</span><span id="thisWeekMeta">-</span>
           </div>
         </section>
 
         <section class="card">
-          <h2>Data Freshness</h2>
-          <div id="freshnessStatus" class="stat">-</div>
+          <h2>Remaining</h2>
+          <div id="remainingCard" class="stat">$0</div>
           <div class="kvs">
-            <span class="muted">Last increased cumulative date</span><span id="lastIncreaseDate">-</span>
-            <span class="muted">Days since update</span><span id="daysSinceUpdate">-</span>
+            <span class="muted">~Daily pace to primary</span><span id="paceDaily">$0/day</span>
           </div>
         </section>
       </div>
 
       <section class="card" style="margin-top:12px;">
-        <h2>Channel Summary</h2>
+        <h2 style="font-size:2rem;">Overall burn rate</h2>
+        <div class="kvs" style="margin-bottom:10px;">
+          <span class="muted">Expected</span><span id="expectedBurn">0%</span>
+          <span class="muted">Actual</span><span id="actualBurn">0%</span>
+        </div>
+        <div class="bar"><span id="overallBurnBar" style="width:0%"></span></div>
+        <div class="kvs" style="margin-top:8px;">
+          <span class="muted" id="firstDayLabel">-</span><span id="todayLabel">-</span>
+          <span class="muted">Primary</span><span id="primaryDate">-</span>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:12px;">
+        <h2 style="font-size:2rem;">Channel breakdown</h2>
         <table>
           <thead>
             <tr>
@@ -330,80 +347,54 @@
       const plannedToDate = toDateRows.length ? toDateRows[toDateRows.length - 1].runningBudget : 0;
       const googleMetaActualToDate = toDateRows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
       const paidDSPToDate = computePaidDSP(campaignRows, todayDate);
-      const actualToDate = googleMetaActualToDate + paidDSPToDate;
+      const actualToDate = totalsRow.weeklyBudget || (googleMetaActualToDate + paidDSPToDate);
 
       const paceDelta = actualToDate - plannedToDate;
       const paceDeltaPct = plannedToDate ? (paceDelta / plannedToDate) * 100 : 0;
-      let paceClass = 'good';
-      let paceLabel = 'On Track';
       const absPct = Math.abs(paceDeltaPct);
-      if (absPct > 25) { paceClass = 'bad'; paceLabel = 'Off Pace'; }
-      else if (absPct > 10) { paceClass = 'warn'; paceLabel = 'Watch'; }
+      const paceClass = absPct > 25 ? 'bad' : absPct > 10 ? 'warn' : 'good';
+      const totalBudget = totalsRow.dailyTotalBudget;
+      const budgetSpentPct = totalBudget ? (actualToDate / totalBudget) * 100 : 0;
 
-      $('pacingStatus').textContent = paceLabel;
-      $('pacingStatus').className = `stat ${paceClass}`;
-      $('plannedToDate').textContent = money(plannedToDate);
+      $('totalBudgetCard').textContent = money(totalsRow.dailyTotalBudget);
+      $('campaignLabel').textContent = 'Full campaign';
       $('actualToDate').textContent = money(actualToDate);
-      $('pacingDelta').textContent = money(paceDelta);
-      $('pacingDeltaPct').textContent = pct(paceDeltaPct);
+      $('actualToDate').className = `stat ${paceClass}`;
+      $('pacingDeltaPct').textContent = `${pct(budgetSpentPct)} used`;
 
       const totalDays = (firstDay && primary) ? daysBetween(firstDay, primary) + 1 : 0;
       const elapsedDays = firstDay ? Math.min(totalDays, Math.max(0, daysBetween(firstDay, todayDate) + 1)) : 0;
       const daysToPrimary = primary ? Math.max(0, daysBetween(todayDate, primary)) : 0;
       const elapsedPct = totalDays ? (elapsedDays / totalDays) * 100 : 0;
 
-      const totalBudget = totalsRow.dailyTotalBudget;
-      const budgetSpentPct = totalBudget ? (actualToDate / totalBudget) * 100 : 0;
+      const thisWeek = toDateRows.length ? toDateRows[toDateRows.length - 1].weeklyActual : 0;
+      const remaining = Math.max(0, totalBudget - actualToDate);
+      const paceDaily = daysToPrimary > 0 ? remaining / daysToPrimary : remaining;
 
+      $('thisWeekCard').textContent = money(thisWeek);
+      $('thisWeekMeta').textContent = `of ${money(totalsRow.weeklyActual)} plan`;
+      $('remainingCard').textContent = money(remaining);
+      $('paceDaily').textContent = `${money(paceDaily)}/day`;
+
+      $('expectedBurn').textContent = pct(elapsedPct);
+      $('actualBurn').textContent = pct(budgetSpentPct);
+      $('overallBurnBar').style.width = `${Math.max(0, Math.min(100, budgetSpentPct))}%`;
+      $('firstDayLabel').textContent = toISO(firstDay);
+      $('todayLabel').textContent = `${toISO(todayDate)} (today)`;
       $('primaryDate').textContent = toISO(primary);
-      $('totalDays').textContent = totalDays;
-      $('daysElapsed').textContent = elapsedDays;
-      $('pctElapsed').textContent = pct(elapsedPct);
-      $('daysToPrimary').textContent = daysToPrimary;
-      $('pctBudgetSpent').textContent = pct(budgetSpentPct);
-
-      const dailySeries = toDateRows.map(r => r.googleDaily + r.metaDaily);
-      const last7 = dailySeries.slice(-7);
-      const rollingAvg = last7.length ? last7.reduce((s, n) => s + n, 0) / last7.length : 0;
-      const projectionBase = actualToDate + (rollingAvg * daysToPrimary);
-      const unpaidDSP = campaignRows
-        .filter(r => r.dspCommitment > 0 && r.date <= primary)
-        .reduce((s, r) => s + r.dspCommitment, 0) - paidDSPToDate;
-      const projectedFinal = projectionBase + Math.max(0, unpaidDSP);
-      const projectionDelta = projectedFinal - totalBudget;
-
-      $('rollingAvg').textContent = money(rollingAvg);
-      $('projectedFinal').textContent = money(projectedFinal);
-      $('projectionHeadline').textContent = money(projectedFinal);
-      $('projectionDelta').textContent = money(projectionDelta);
-
-      let lastIncDate = null;
-      for (const r of campaignRows) {
-        if ((r.googleDaily + r.metaDaily) > 0 && r.date <= todayDate) lastIncDate = r.date;
-      }
-      const daysSince = lastIncDate ? daysBetween(lastIncDate, todayDate) : null;
-      let freshness = 'Current';
-      let freshnessClass = 'good';
-      if (daysSince !== null && daysSince > 2) { freshness = 'Stale'; freshnessClass = 'warn'; }
-      $('freshnessStatus').textContent = freshness;
-      $('freshnessStatus').className = `stat ${freshnessClass}`;
-      $('lastIncreaseDate').textContent = toISO(lastIncDate);
-      $('daysSinceUpdate').textContent = daysSince === null ? '-' : daysSince;
 
       const tbody = $('channelBody');
       tbody.innerHTML = '';
-      const toDateGoogleDisplay = toDateRows.reduce((sum, row) => sum + row.googleDisplayBudget, 0);
-      const toDateGoogleSearch = toDateRows.reduce((sum, row) => sum + row.googleSearchBudget, 0);
-      const toDateMetaReach = toDateRows.reduce((sum, row) => sum + row.metaReach, 0);
-      const toDateMetaVoterFile = toDateRows.reduce((sum, row) => sum + row.metaVoterFile, 0);
+      const googleSpent = toDateRows.length ? toDateRows[toDateRows.length - 1].googleCum : 0;
+      const metaSpent = toDateRows.length ? toDateRows[toDateRows.length - 1].metaCum : 0;
       const toDateDSP = computePaidDSP(campaignRows, todayDate);
+      const googleAllocated = totalsRow.googleDisplayBudget + totalsRow.googleSearchBudget;
+      const metaAllocated = totalsRow.metaTotal || (totalsRow.metaReach + totalsRow.metaVoterFile + totalsRow.metaBoosted);
 
       const channelRows = [
-        { name: 'Google Display', allocated: totalsRow.googleDisplayBudget, spent: toDateGoogleDisplay },
-        { name: 'Google Search', allocated: totalsRow.googleSearchBudget, spent: toDateGoogleSearch },
-        { name: 'Meta Reach', allocated: totalsRow.metaReach, spent: toDateMetaReach },
-        { name: 'Meta Voter File', allocated: totalsRow.metaVoterFile, spent: toDateMetaVoterFile },
-        { name: 'DSPolitical', allocated: totalsRow.dspCommitment, spent: toDateDSP }
+        { name: 'Google ads (total)', allocated: googleAllocated, spent: googleSpent },
+        { name: 'Meta ads (including all)', allocated: metaAllocated, spent: metaSpent },
+        { name: 'DSPolitical/other', allocated: totalsRow.dspCommitment, spent: toDateDSP }
       ];
 
       channelRows.forEach(c => {
