@@ -607,6 +607,9 @@
       weeklyBody.innerHTML = '';
 
       const weeklySeries = [];
+      const weekStarts = [2, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
+      const campaignStart = 3;
+      const campaignEnd = 80;
       if (preCampaign) {
         const preGoogle = preCampaign.googleCum || 0;
         const preMeta = preCampaign.metaCum || 0;
@@ -620,15 +623,37 @@
         });
       }
 
-      campaignRows.forEach((row, idx) => {
-        const dspWeek = row.weeklyActual || 0;
-        const label = row.label || (row.date ? toISO(row.date) : `Week ${idx + 1}`);
-        const total = row.googleDaily + row.metaDaily + dspWeek;
+      const weekRanges = weekStarts
+        .map((start, idx) => {
+          const nextStart = weekStarts[idx + 1];
+          return {
+            start: Math.max(start, campaignStart),
+            end: Math.min(nextStart ? nextStart - 1 : campaignEnd, campaignEnd)
+          };
+        })
+        .filter(({ start, end }) => start <= end);
+
+      weekRanges.forEach(({ start, end }) => {
+        const bucketRows = campaignRows.filter(r => r.sheetRow >= start && r.sheetRow <= end);
+        if (!bucketRows.length) return;
+
+        const google = bucketRows.reduce((sum, r) => sum + r.googleDaily, 0);
+        const meta = bucketRows.reduce((sum, r) => sum + r.metaDaily, 0);
+        const dsp = bucketRows.reduce((sum, r) => sum + (r.weeklyActual || 0), 0);
+        const firstRow = bucketRows[0];
+        const lastRow = bucketRows[bucketRows.length - 1];
+        const firstLabel = firstRow.label || (firstRow.date ? toISO(firstRow.date) : '');
+        const lastLabel = lastRow.label || (lastRow.date ? toISO(lastRow.date) : '');
+        const label = firstLabel && lastLabel
+          ? (firstLabel === lastLabel ? firstLabel : `${firstLabel}–${lastLabel}`)
+          : (firstLabel || lastLabel || `Week of row ${start}`);
+        const total = google + meta + dsp;
+
         weeklySeries.push({
           label,
-          google: row.googleDaily,
-          meta: row.metaDaily,
-          dsp: dspWeek,
+          google,
+          meta,
+          dsp,
           total
         });
       });
@@ -656,10 +681,12 @@
       $('lifetimeDSP').textContent = money(lifetimeDSP);
       $('lifetimeTotal').textContent = money(lifetimeTotal);
 
-      const linePoints = campaignRows.map((row, idx) => {
-        const actual = weeklySeries.slice(0, idx + 2).reduce((sum, w) => sum + w.total, 0);
+      let campaignActualRunning = 0;
+      const linePoints = campaignRows.map((row) => {
+        campaignActualRunning += row.googleDaily + row.metaDaily + (row.weeklyActual || 0);
+        const actual = campaignActualRunning + preTotal;
         return {
-          label: row.label || (row.date ? toISO(row.date) : `Week ${idx + 1}`),
+          label: row.label || (row.date ? toISO(row.date) : `Row ${row.sheetRow}`),
           actual,
           plan: row.runningBudget + preTotal
         };
