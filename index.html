@@ -292,12 +292,12 @@
         </section>
 
         <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:2rem;">Lifetime spend vs running budget</h2>
+          <h2 style="font-size:2rem;">Cumulative burn vs target pace</h2>
           <div class="legend">
             <span><span class="swatch" style="background:var(--accent)"></span>Actual cumulative spend</span>
-            <span><span class="swatch" style="background:var(--planned)"></span>Planned running budget</span>
+            <span><span class="swatch" style="background:var(--planned)"></span>Target pace</span>
           </div>
-          <div id="lineChart" class="line-chart"></div>
+          <div id="cumulativeBurnChart" class="line-chart"></div>
         </section>
 
         <section class="card" style="margin-top:12px;">
@@ -320,6 +320,8 @@
     const SHEET_ID = '1gHPmpRQxXCtBCB6AkXVljv1VRa1m6W5YV_Q34fevF0Q';
     const RANGE = 'Tracker!A2:S82';
     const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/userinfo.email';
+    const CAMPAIGN_START = new Date('2026-05-26T00:00:00');
+    const PRIMARY_DATE = new Date('2026-08-11T00:00:00');
 
     let tokenClient;
     let accessToken = null;
@@ -335,14 +337,15 @@
     };
     const daysBetween = (a, b) => Math.round((b - a) / 86400000);
     const toISO = (d) => d ? d.toISOString().slice(0, 10) : '-';
+    const toMMDDYYYY = (d) => d ? new Intl.DateTimeFormat('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).format(d) : '-';
 
     function showError(msg) {
       $('errorBox').textContent = msg;
       $('errorBox').classList.remove('hidden');
     }
 
-    function renderLineChart(points) {
-      const host = $('lineChart');
+    function renderLineChart(hostId, points) {
+      const host = $(hostId);
       host.innerHTML = '';
       if (!points.length) {
         host.textContent = 'No points available yet.';
@@ -367,14 +370,14 @@
         const val = maxY * (1 - ratio);
         const yy = pad.top + (height - pad.top - pad.bottom) * ratio;
         return `<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" stroke="#d1d5db" stroke-width="1" />
-          <text x="${pad.left - 8}" y="${yy + 4}" text-anchor="end" fill="#6b7280" font-size="11">${Math.round(val).toLocaleString()}</text>`;
+          <text x="${pad.left - 8}" y="${yy + 4}" text-anchor="end" fill="#6b7280" font-size="11">${money(val)}</text>`;
       }).join('');
 
       host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Lifetime spend line chart">
         ${tickMarkup}
         <line x1="${pad.left}" y1="${height - pad.bottom}" x2="${width - pad.right}" y2="${height - pad.bottom}" stroke="#9ca3af" stroke-width="1" />
-        <path d="${planPath}" fill="none" stroke="var(--planned)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
-        <path d="${actualPath}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+        <path d="${planPath}" fill="none" stroke="var(--planned)" stroke-width="3" stroke-dasharray="8 6" stroke-linejoin="round" stroke-linecap="round" />
+        <path d="${actualPath}" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" />
         <text x="${pad.left}" y="${height - 10}" fill="#6b7280" font-size="11">${points[0].label}</text>
         <text x="${width - pad.right}" y="${height - 10}" text-anchor="end" fill="#6b7280" font-size="11">${points[points.length - 1].label}</text>
       </svg>`;
@@ -525,6 +528,35 @@
         const hasActualAfter = campaignRows.slice(i + 1).some(r => r.date && r.date <= today && (r.googleDaily + r.metaDaily) > 0);
         return sum + (hasActualAfter ? row.dspCommitment : 0);
       }, 0);
+    }
+
+    function buildBurnSeriesFromCumulative(campaignRows, totalBudget) {
+      const totalCampaignDays = daysBetween(CAMPAIGN_START, PRIMARY_DATE) + 1;
+      if (totalCampaignDays <= 0) return [];
+
+      const cumulativeByDate = campaignRows
+        .filter((r) => r.date)
+        .map((r) => ({
+          date: r.date,
+          cumulativeActual: r.googleCum + r.metaCum + r.dspTotalSpend
+        }))
+        .sort((a, b) => a.date - b.date);
+
+      let latestIndex = -1;
+      let latestCumulative = 0;
+      return Array.from({ length: totalCampaignDays }).map((_, dayIndex) => {
+        const pointDate = new Date(CAMPAIGN_START);
+        pointDate.setDate(CAMPAIGN_START.getDate() + dayIndex);
+        while (latestIndex + 1 < cumulativeByDate.length && cumulativeByDate[latestIndex + 1].date <= pointDate) {
+          latestIndex += 1;
+          latestCumulative = cumulativeByDate[latestIndex].cumulativeActual;
+        }
+        return {
+          label: dayIndex === 0 || dayIndex === totalCampaignDays - 1 ? toMMDDYYYY(pointDate) : '',
+          actual: latestCumulative,
+          plan: (dayIndex / totalCampaignDays) * totalBudget
+        };
+      });
     }
 
     function render(data) {
@@ -681,19 +713,10 @@
       $('lifetimeDSP').textContent = money(lifetimeDSP);
       $('lifetimeTotal').textContent = money(lifetimeTotal);
 
-      let campaignActualRunning = 0;
-      const linePoints = campaignRows.map((row) => {
-        campaignActualRunning += row.googleDaily + row.metaDaily + (row.weeklyActual || 0);
-        const actual = campaignActualRunning + preTotal;
-        return {
-          label: row.label || (row.date ? toISO(row.date) : `Row ${row.sheetRow}`),
-          actual,
-          plan: row.runningBudget + preTotal
-        };
-      });
+      const burnSeries = buildBurnSeriesFromCumulative(campaignRows, totalBudget);
 
       renderStackedWeeklyChart(weeklySeries);
-      renderLineChart(linePoints);
+      renderLineChart('cumulativeBurnChart', burnSeries);
     }
 
     async function loadSheetData() {
