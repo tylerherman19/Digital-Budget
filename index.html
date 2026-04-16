@@ -133,7 +133,7 @@
           <h2>This week</h2>
           <div id="thisWeekCard" class="stat">$0</div>
           <div class="kvs">
-            <span class="muted">Current week actual (S)</span><span id="thisWeekMeta">-</span>
+            <span class="muted">Current week burn (R)</span><span id="thisWeekMeta">-</span>
           </div>
         </section>
 
@@ -276,14 +276,14 @@
       GOOGLE_SEARCH_BUDGET: 2,  // C
       GOOGLE_CUM_ACTUAL: 3,   // D
       META_CUM_ACTUAL: 4,     // E
-      META_TOTAL: 7,          // H
-      META_REACH: 8,          // I
+      META_CURRENT_SPEND: 7,  // H (totals row current Meta spend)
+      GOOGLE_CURRENT_SPEND: 8,// I (totals row current Google spend)
       META_VOTER_FILE: 9,     // J
       META_BOOSTED: 10,       // K
       DSPOLITICAL: 11,        // L
       DAILY_TOTAL_BUDGET: 13, // N
       RUNNING_BUDGET: 15,     // P
-      WEEKLY_BUDGET: 17,      // R
+      WEEKLY_BURN: 17,        // R
       WEEKLY_ACTUAL: 18       // S
     };
 
@@ -297,14 +297,14 @@
           googleSearchBudget: parseMoney(r[COL.GOOGLE_SEARCH_BUDGET]),
           googleCum: parseMoney(r[COL.GOOGLE_CUM_ACTUAL]), // D cumulative
           metaCum: parseMoney(r[COL.META_CUM_ACTUAL]),   // E cumulative
-          metaTotal: parseMoney(r[COL.META_TOTAL]),      // H
-          metaReach: parseMoney(r[COL.META_REACH]),      // I
+          metaCurrentSpend: parseMoney(r[COL.META_CURRENT_SPEND]), // H
+          googleCurrentSpend: parseMoney(r[COL.GOOGLE_CURRENT_SPEND]), // I
           metaVoterFile: parseMoney(r[COL.META_VOTER_FILE]), // J
           metaBoosted: parseMoney(r[COL.META_BOOSTED]),  // K
           dspCommitment: parseMoney(r[COL.DSPOLITICAL]), // L
           dailyTotalBudget: parseMoney(r[COL.DAILY_TOTAL_BUDGET]), // N
           runningBudget: parseMoney(r[COL.RUNNING_BUDGET]), // P
-          weeklyBudget: parseMoney(r[COL.WEEKLY_BUDGET]), // R
+          weeklyBurn: parseMoney(r[COL.WEEKLY_BURN]), // R
           weeklyActual: parseMoney(r[COL.WEEKLY_ACTUAL]), // S
           raw: r
         };
@@ -347,16 +347,16 @@
       const plannedToDate = toDateRows.length ? toDateRows[toDateRows.length - 1].runningBudget : 0;
       const googleMetaActualToDate = toDateRows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
       const paidDSPToDate = computePaidDSP(campaignRows, todayDate);
-      const actualToDate = totalsRow.weeklyBudget || (googleMetaActualToDate + paidDSPToDate);
+      const actualToDate = (totalsRow.googleCurrentSpend + totalsRow.metaCurrentSpend) || (googleMetaActualToDate + paidDSPToDate);
 
       const paceDelta = actualToDate - plannedToDate;
       const paceDeltaPct = plannedToDate ? (paceDelta / plannedToDate) * 100 : 0;
       const absPct = Math.abs(paceDeltaPct);
       const paceClass = absPct > 25 ? 'bad' : absPct > 10 ? 'warn' : 'good';
-      const totalBudget = totalsRow.dailyTotalBudget;
+      const totalBudget = totalsRow.weeklyBurn;
       const budgetSpentPct = totalBudget ? (actualToDate / totalBudget) * 100 : 0;
 
-      $('totalBudgetCard').textContent = money(totalsRow.dailyTotalBudget);
+      $('totalBudgetCard').textContent = money(totalBudget);
       $('campaignLabel').textContent = 'Full campaign';
       $('actualToDate').textContent = money(actualToDate);
       $('actualToDate').className = `stat ${paceClass}`;
@@ -367,12 +367,12 @@
       const daysToPrimary = primary ? Math.max(0, daysBetween(todayDate, primary)) : 0;
       const elapsedPct = totalDays ? (elapsedDays / totalDays) * 100 : 0;
 
-      const thisWeek = toDateRows.length ? toDateRows[toDateRows.length - 1].weeklyActual : 0;
+      const thisWeek = toDateRows.length ? toDateRows[toDateRows.length - 1].weeklyBurn : 0;
       const remaining = Math.max(0, totalBudget - actualToDate);
       const paceDaily = daysToPrimary > 0 ? remaining / daysToPrimary : remaining;
 
       $('thisWeekCard').textContent = money(thisWeek);
-      $('thisWeekMeta').textContent = `of ${money(totalsRow.weeklyActual)} plan`;
+      $('thisWeekMeta').textContent = `of ${money(totalsRow.weeklyBurn)} budget`;
       $('remainingCard').textContent = money(remaining);
       $('paceDaily').textContent = `${money(paceDaily)}/day`;
 
@@ -385,11 +385,11 @@
 
       const tbody = $('channelBody');
       tbody.innerHTML = '';
-      const googleSpent = toDateRows.length ? toDateRows[toDateRows.length - 1].googleCum : 0;
-      const metaSpent = toDateRows.length ? toDateRows[toDateRows.length - 1].metaCum : 0;
+      const googleSpent = totalsRow.googleCurrentSpend || (toDateRows.length ? toDateRows[toDateRows.length - 1].googleCum : 0);
+      const metaSpent = totalsRow.metaCurrentSpend || (toDateRows.length ? toDateRows[toDateRows.length - 1].metaCum : 0);
       const toDateDSP = computePaidDSP(campaignRows, todayDate);
       const googleAllocated = totalsRow.googleDisplayBudget + totalsRow.googleSearchBudget;
-      const metaAllocated = totalsRow.metaTotal || (totalsRow.metaReach + totalsRow.metaVoterFile + totalsRow.metaBoosted);
+      const metaAllocated = totalsRow.metaVoterFile + totalsRow.metaBoosted;
 
       const channelRows = [
         { name: 'Google ads (total)', allocated: googleAllocated, spent: googleSpent },
