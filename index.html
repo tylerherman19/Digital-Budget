@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Budget Tracker</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --muted: #94a3b8;
+      --text: #e2e8f0;
+      --good: #22c55e;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --border: #1f2937;
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: linear-gradient(160deg, #020617, #0b1020 55%, #111827);
+      color: var(--text);
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 80px; }
+    .topbar {
+      display: flex; justify-content: space-between; gap: 12px; align-items: center;
+      flex-wrap: wrap; margin-bottom: 18px;
+    }
+    h1 { margin: 0; font-size: 1.4rem; }
+    .muted { color: var(--muted); }
+    button {
+      border: 1px solid var(--border);
+      background: #0b1224;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: rgba(17, 24, 39, 0.82);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      backdrop-filter: blur(5px);
+    }
+    .card h2 { margin: 0 0 10px; font-size: 1rem; }
+    .stat { font-size: 1.25rem; font-weight: 700; margin: 4px 0; }
+    .good { color: var(--good); }
+    .warn { color: var(--warn); }
+    .bad { color: var(--bad); }
+    .kvs {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 10px;
+      font-size: 0.95rem;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 9px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+    th:first-child, td:first-child { text-align: left; }
+    .hidden { display: none; }
+    .error {
+      margin-top: 12px;
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #fecaca;
+      border-radius: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Digital Budget Tracker</h1>
+        <div id="userEmail" class="muted">Signed out</div>
+      </div>
+      <div>
+        <button id="signInBtn">Sign in with Google</button>
+        <button id="signOutBtn" class="hidden">Sign out</button>
+      </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+      <div class="grid">
+        <section class="card">
+          <h2>Pacing</h2>
+          <div id="pacingStatus" class="stat">-</div>
+          <div class="kvs">
+            <span class="muted">Planned to date (P)</span><span id="plannedToDate">$0</span>
+            <span class="muted">Actual to date</span><span id="actualToDate">$0</span>
+            <span class="muted">Delta ($)</span><span id="pacingDelta">$0</span>
+            <span class="muted">Delta (%)</span><span id="pacingDeltaPct">0%</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Campaign Clock</h2>
+          <div class="kvs">
+            <span class="muted">Primary date</span><span id="primaryDate">-</span>
+            <span class="muted">Total campaign days</span><span id="totalDays">0</span>
+            <span class="muted">Days elapsed</span><span id="daysElapsed">0</span>
+            <span class="muted">% elapsed</span><span id="pctElapsed">0%</span>
+            <span class="muted">Days to primary</span><span id="daysToPrimary">0</span>
+            <span class="muted">% budget spent</span><span id="pctBudgetSpent">0%</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Projected Final Spend</h2>
+          <div id="projectionHeadline" class="stat">$0</div>
+          <div class="kvs">
+            <span class="muted">7-day avg (Google+Meta)</span><span id="rollingAvg">$0</span>
+            <span class="muted">Projected at primary</span><span id="projectedFinal">$0</span>
+            <span class="muted">Compared to total budget (N82)</span><span id="projectionDelta">$0</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Data Freshness</h2>
+          <div id="freshnessStatus" class="stat">-</div>
+          <div class="kvs">
+            <span class="muted">Last increased cumulative date</span><span id="lastIncreaseDate">-</span>
+            <span class="muted">Days since update</span><span id="daysSinceUpdate">-</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="card" style="margin-top:12px;">
+        <h2>Channel Summary</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Allocated</th>
+              <th>Spent</th>
+              <th>Remaining</th>
+              <th>% Used</th>
+            </tr>
+          </thead>
+          <tbody id="channelBody"></tbody>
+        </table>
+      </section>
+
+      <section class="card" style="margin-top:12px;">
+        <h2>Before Campaign (Row 2)</h2>
+        <div class="kvs">
+          <span class="muted">Date</span><span id="preDate">-</span>
+          <span class="muted">Google cumulative at row 2</span><span id="preGoogle">$0</span>
+          <span class="muted">Meta cumulative at row 2</span><span id="preMeta">$0</span>
+          <span class="muted">DSPolitical commitments row 2</span><span id="preDSP">$0</span>
+          <span class="muted">Before-campaign spend total</span><span id="preTotal">$0</span>
+        </div>
+      </section>
+    </div>
+
+    <div id="errorBox" class="error hidden"></div>
+  </div>
+
+  <script>
+    const CLIENT_ID = '1023469996726-hlpc7lc2ducddp8q286m53tp0qsti3op.apps.googleusercontent.com';
+    const SHEET_ID = '1gHPmpRQxXCtBCB6AkXVljv1VRa1m6W5YV_Q34fevF0Q';
+    const RANGE = 'Tracker!A2:Z82';
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/userinfo.email';
+
+    let tokenClient;
+    let accessToken = null;
+
+    const $ = (id) => document.getElementById(id);
+    const money = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n) || 0);
+    const pct = (n) => `${(Number(n) || 0).toFixed(1)}%`;
+    const parseMoney = (v) => Number(String(v ?? '').replace(/[^0-9.-]/g, '')) || 0;
+    const parseDate = (v) => {
+      if (!v) return null;
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    };
+    const daysBetween = (a, b) => Math.round((b - a) / 86400000);
+    const toISO = (d) => d ? d.toISOString().slice(0, 10) : '-';
+
+    function showError(msg) {
+      $('errorBox').textContent = msg;
+      $('errorBox').classList.remove('hidden');
+    }
+
+    async function initAuth() {
+      try {
+        await new Promise((resolve) => gapi.load('client', resolve));
+        await gapi.client.init({});
+
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: handleTokenResponse,
+          error_callback: (e) => showError(`OAuth error: ${e.type || 'unknown'}`)
+        });
+      } catch (err) {
+        showError(`Auth initialization failed: ${err.message || err}`);
+      }
+    }
+
+    function handleSignIn() {
+      if (!tokenClient) return showError('Auth is not ready yet.');
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    async function handleTokenResponse(response) {
+      if (response.error) return showError(`Token error: ${response.error}`);
+      accessToken = response.access_token;
+      gapi.client.setToken({ access_token: accessToken });
+      $('signInBtn').classList.add('hidden');
+      $('signOutBtn').classList.remove('hidden');
+      $('dashboard').classList.remove('hidden');
+      await fetchUserInfo();
+      await loadSheetData();
+    }
+
+    function handleSignOut() {
+      if (accessToken) google.accounts.oauth2.revoke(accessToken);
+      accessToken = null;
+      gapi.client.setToken('');
+      $('userEmail').textContent = 'Signed out';
+      $('dashboard').classList.add('hidden');
+      $('signOutBtn').classList.add('hidden');
+      $('signInBtn').classList.remove('hidden');
+    }
+
+    async function fetchUserInfo() {
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const data = await res.json();
+        $('userEmail').textContent = data.email || 'Signed in';
+      } catch (err) {
+        $('userEmail').textContent = 'Signed in';
+      }
+    }
+
+    function deriveRows(values) {
+      const rows = values.map((r, idx) => {
+        const sheetRow = idx + 2;
+        return {
+          sheetRow,
+          date: parseDate(r[0]),
+          googleCum: parseMoney(r[3]), // D cumulative
+          metaCum: parseMoney(r[4]),   // E cumulative
+          dspCommitment: parseMoney(r[11]), // L
+          plannedCurve: parseMoney(r[15]), // P
+          totalBudgetMarker: parseMoney(r[13]), // N
+          raw: r
+        };
+      });
+
+      const preCampaign = rows.find(r => r.sheetRow === 2) || null;
+      const campaignRows = rows.filter(r => r.sheetRow >= 3 && r.sheetRow <= 80 && r.date);
+      const totalsRow = rows.find(r => r.sheetRow === 82) || null;
+
+      let prevGoogle = preCampaign ? preCampaign.googleCum : 0;
+      let prevMeta = preCampaign ? preCampaign.metaCum : 0;
+      campaignRows.forEach((r) => {
+        r.googleDaily = Math.max(0, r.googleCum - prevGoogle);
+        r.metaDaily = Math.max(0, r.metaCum - prevMeta);
+        prevGoogle = r.googleCum;
+        prevMeta = r.metaCum;
+      });
+
+      return { preCampaign, campaignRows, totalsRow };
+    }
+
+    function computePaidDSP(campaignRows, today) {
+      return campaignRows.reduce((sum, row, i) => {
+        if (!(row.dspCommitment > 0 && row.date <= today)) return sum;
+        const hasActualAfter = campaignRows.slice(i + 1).some(r => r.date <= today && (r.googleDaily + r.metaDaily) > 0);
+        return sum + (hasActualAfter ? row.dspCommitment : 0);
+      }, 0);
+    }
+
+    function render(data) {
+      const { preCampaign, campaignRows, totalsRow } = data;
+      if (!totalsRow) return showError('Totals row (82) not found in fetched range.');
+
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const primary = campaignRows.length ? campaignRows[campaignRows.length - 1].date : null;
+      const firstDay = campaignRows.length ? campaignRows[0].date : null;
+
+      const toDateRows = campaignRows.filter(r => r.date <= todayDate);
+      const plannedToDate = toDateRows.length ? toDateRows[toDateRows.length - 1].plannedCurve : 0;
+      const googleMetaActualToDate = toDateRows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
+      const paidDSPToDate = computePaidDSP(campaignRows, todayDate);
+      const actualToDate = googleMetaActualToDate + paidDSPToDate;
+
+      const paceDelta = actualToDate - plannedToDate;
+      const paceDeltaPct = plannedToDate ? (paceDelta / plannedToDate) * 100 : 0;
+      let paceClass = 'good';
+      let paceLabel = 'On Track';
+      const absPct = Math.abs(paceDeltaPct);
+      if (absPct > 25) { paceClass = 'bad'; paceLabel = 'Off Pace'; }
+      else if (absPct > 10) { paceClass = 'warn'; paceLabel = 'Watch'; }
+
+      $('pacingStatus').textContent = paceLabel;
+      $('pacingStatus').className = `stat ${paceClass}`;
+      $('plannedToDate').textContent = money(plannedToDate);
+      $('actualToDate').textContent = money(actualToDate);
+      $('pacingDelta').textContent = money(paceDelta);
+      $('pacingDeltaPct').textContent = pct(paceDeltaPct);
+
+      const totalDays = (firstDay && primary) ? daysBetween(firstDay, primary) + 1 : 0;
+      const elapsedDays = firstDay ? Math.min(totalDays, Math.max(0, daysBetween(firstDay, todayDate) + 1)) : 0;
+      const daysToPrimary = primary ? Math.max(0, daysBetween(todayDate, primary)) : 0;
+      const elapsedPct = totalDays ? (elapsedDays / totalDays) * 100 : 0;
+
+      const totalBudget = totalsRow.totalBudgetMarker;
+      const budgetSpentPct = totalBudget ? (actualToDate / totalBudget) * 100 : 0;
+
+      $('primaryDate').textContent = toISO(primary);
+      $('totalDays').textContent = totalDays;
+      $('daysElapsed').textContent = elapsedDays;
+      $('pctElapsed').textContent = pct(elapsedPct);
+      $('daysToPrimary').textContent = daysToPrimary;
+      $('pctBudgetSpent').textContent = pct(budgetSpentPct);
+
+      const dailySeries = toDateRows.map(r => r.googleDaily + r.metaDaily);
+      const last7 = dailySeries.slice(-7);
+      const rollingAvg = last7.length ? last7.reduce((s, n) => s + n, 0) / last7.length : 0;
+      const projectionBase = actualToDate + (rollingAvg * daysToPrimary);
+      const unpaidDSP = campaignRows
+        .filter(r => r.dspCommitment > 0 && r.date <= primary)
+        .reduce((s, r) => s + r.dspCommitment, 0) - paidDSPToDate;
+      const projectedFinal = projectionBase + Math.max(0, unpaidDSP);
+      const projectionDelta = projectedFinal - totalBudget;
+
+      $('rollingAvg').textContent = money(rollingAvg);
+      $('projectedFinal').textContent = money(projectedFinal);
+      $('projectionHeadline').textContent = money(projectedFinal);
+      $('projectionDelta').textContent = money(projectionDelta);
+
+      let lastIncDate = null;
+      for (const r of campaignRows) {
+        if ((r.googleDaily + r.metaDaily) > 0 && r.date <= todayDate) lastIncDate = r.date;
+      }
+      const daysSince = lastIncDate ? daysBetween(lastIncDate, todayDate) : null;
+      let freshness = 'Current';
+      let freshnessClass = 'good';
+      if (daysSince !== null && daysSince > 2) { freshness = 'Stale'; freshnessClass = 'warn'; }
+      $('freshnessStatus').textContent = freshness;
+      $('freshnessStatus').className = `stat ${freshnessClass}`;
+      $('lastIncreaseDate').textContent = toISO(lastIncDate);
+      $('daysSinceUpdate').textContent = daysSince === null ? '-' : daysSince;
+
+      const channelConfigs = [
+        { name: 'Google Display', allocIdx: 16, spentIdx: 17 },
+        { name: 'Google Search', allocIdx: 18, spentIdx: 19 },
+        { name: 'Meta Reach', allocIdx: 20, spentIdx: 21 },
+        { name: 'Meta Voter File', allocIdx: 22, spentIdx: 23 },
+        { name: 'DSPolitical', allocIdx: 24, spentIdx: 25 }
+      ];
+
+      const tbody = $('channelBody');
+      tbody.innerHTML = '';
+      channelConfigs.forEach(c => {
+        const allocated = parseMoney(totalsRow.raw[c.allocIdx]);
+        const spent = parseMoney(totalsRow.raw[c.spentIdx]);
+        const remaining = allocated - spent;
+        const used = allocated ? (spent / allocated) * 100 : 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${c.name}</td><td>${money(allocated)}</td><td>${money(spent)}</td><td>${money(remaining)}</td><td>${pct(used)}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      const preTotal = (preCampaign?.googleCum || 0) + (preCampaign?.metaCum || 0) + (preCampaign?.dspCommitment || 0);
+      $('preDate').textContent = toISO(preCampaign?.date || null);
+      $('preGoogle').textContent = money(preCampaign?.googleCum || 0);
+      $('preMeta').textContent = money(preCampaign?.metaCum || 0);
+      $('preDSP').textContent = money(preCampaign?.dspCommitment || 0);
+      $('preTotal').textContent = money(preTotal);
+    }
+
+    async function loadSheetData() {
+      try {
+        const res = await gapi.client.request({
+          path: `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(RANGE)}`
+        });
+        const values = res.result.values || [];
+        const parsed = deriveRows(values);
+        render(parsed);
+      } catch (err) {
+        showError(`Failed to load sheet data: ${err.message || err.result?.error?.message || err}`);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      $('signInBtn').addEventListener('click', handleSignIn);
+      $('signOutBtn').addEventListener('click', handleSignOut);
+
+      const waitForSDK = setInterval(async () => {
+        if (window.google?.accounts?.oauth2 && window.gapi?.load) {
+          clearInterval(waitForSDK);
+          await initAuth();
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>
