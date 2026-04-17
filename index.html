@@ -709,23 +709,30 @@
         .filter((r) => r.date)
         .map((r) => ({
           date: r.date,
-          cumulativeActual: r.googleCum + r.metaCum + r.dspTotalSpend
+          cumulativeActual: r.googleCum + r.metaCum + r.dspTotalSpend,
+          runningBudget: r.runningBudget
         }))
         .sort((a, b) => a.date - b.date);
 
+      const hasRunningBudget = cumulativeByDate.some(r => r.runningBudget > 0);
+
       let latestIndex = -1;
       let latestCumulative = 0;
+      let latestPlan = 0;
       return Array.from({ length: totalCampaignDays }).map((_, dayIndex) => {
         const pointDate = new Date(CAMPAIGN_START);
         pointDate.setDate(CAMPAIGN_START.getDate() + dayIndex);
         while (latestIndex + 1 < cumulativeByDate.length && cumulativeByDate[latestIndex + 1].date <= pointDate) {
           latestIndex += 1;
           latestCumulative = cumulativeByDate[latestIndex].cumulativeActual;
+          if (hasRunningBudget && cumulativeByDate[latestIndex].runningBudget > 0) {
+            latestPlan = cumulativeByDate[latestIndex].runningBudget;
+          }
         }
         return {
           label: dayIndex === 0 || dayIndex === totalCampaignDays - 1 ? toMMDDYYYY(pointDate) : '',
           actual: latestCumulative,
-          plan: (dayIndex / totalCampaignDays) * totalBudget
+          plan: hasRunningBudget ? latestPlan : (dayIndex / totalCampaignDays) * totalBudget
         };
       });
     }
@@ -1152,22 +1159,14 @@
       const metaTotalSpent   = totalsRow.metaCum   || 0;
       const dspSpent         = totalsRow.dspTotalSpend || computePaidDSP(campaignRows, todayDate);
 
-      const gDispSpent  = googleAlloc > 0 ? googleTotalSpent * (googleDisplayAlloc / googleAlloc) : 0;
-      const gSrchSpent  = googleAlloc > 0 ? googleTotalSpent * (googleSearchAlloc  / googleAlloc) : 0;
-      const mReachSpent = metaAlloc   > 0 ? metaTotalSpent  * (metaReachAlloc      / metaAlloc)   : 0;
-      const mVoterSpent = metaAlloc   > 0 ? metaTotalSpent  * (metaVoterAlloc      / metaAlloc)   : 0;
-
-      const gDispBurn  = googleAlloc > 0 ? burnRate7 * (googleDisplayAlloc / googleAlloc) : 0;
-      const gSrchBurn  = googleAlloc > 0 ? burnRate7 * (googleSearchAlloc  / googleAlloc) : 0;
-      const mReachBurn = metaAlloc   > 0 ? burnRate7 * (metaReachAlloc      / metaAlloc)   : 0;
-      const mVoterBurn = metaAlloc   > 0 ? burnRate7 * (metaVoterAlloc      / metaAlloc)   : 0;
+      const totalGMAlloc = googleAlloc + metaAlloc;
+      const googleBurn = totalGMAlloc > 0 ? burnRate7 * (googleAlloc / totalGMAlloc) : 0;
+      const metaBurn   = totalGMAlloc > 0 ? burnRate7 * (metaAlloc   / totalGMAlloc) : 0;
 
       const channels = [
-        { name: 'Google Display',    alloc: googleDisplayAlloc, spent: gDispSpent,  projFinal: gDispSpent  + gDispBurn  * daysRemaining },
-        { name: 'Google Search',     alloc: googleSearchAlloc,  spent: gSrchSpent,  projFinal: gSrchSpent  + gSrchBurn  * daysRemaining },
-        { name: 'Meta Reach',        alloc: metaReachAlloc,     spent: mReachSpent, projFinal: mReachSpent + mReachBurn * daysRemaining },
-        { name: 'Meta Voter File',   alloc: metaVoterAlloc,     spent: mVoterSpent, projFinal: mVoterSpent + mVoterBurn * daysRemaining },
-        { name: 'DSPolitical',       alloc: dspAlloc,           spent: dspSpent,    projFinal: dspAlloc }
+        { name: 'Google',      alloc: googleAlloc, spent: googleTotalSpent, projFinal: googleTotalSpent + googleBurn * daysRemaining },
+        { name: 'Meta',        alloc: metaAlloc,   spent: metaTotalSpent,   projFinal: metaTotalSpent   + metaBurn   * daysRemaining },
+        { name: 'DSPolitical', alloc: dspAlloc,    spent: dspSpent,         projFinal: dspAlloc }
       ];
 
       const tbody = $('channelRemainingBody');
