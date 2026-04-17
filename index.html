@@ -718,7 +718,7 @@
       const hasRunningBudget = cumulativeByDate.some(r => r.runningBudget > 0);
 
       let latestIndex = -1;
-      let latestCumulative = 0;
+      let latestCumulative = (preCampaign?.googleCum || 0) + (preCampaign?.metaCum || 0);
       let latestPlan = 0;
       return Array.from({ length: totalCampaignDays }).map((_, dayIndex) => {
         const pointDate = new Date(CAMPAIGN_START);
@@ -774,12 +774,36 @@
       const daysToPrimary = primary ? Math.max(0, daysBetween(todayDate, primary)) : 0;
       const elapsedPct = totalDays ? (elapsedDays / totalDays) * 100 : 0;
 
-      const thisWeek = toDateRows.length ? toDateRows[toDateRows.length - 1].weeklyBurn : 0;
+      let thisWeek, thisWeekBudget;
+      if (todayDate < CAMPAIGN_START) {
+        thisWeek = (preCampaign?.googleCum || 0) + (preCampaign?.metaCum || 0);
+        thisWeekBudget = PRE_CAMPAIGN_BUDGET;
+      } else {
+        const _weekStarts = [2, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
+        const _campaignEnd = 80;
+        let _weekActual = 0, _weekBudget = 0;
+        for (let wi = 0; wi < _weekStarts.length; wi++) {
+          const _s = Math.max(_weekStarts[wi], 3);
+          const _e = Math.min(_weekStarts[wi + 1] ? _weekStarts[wi + 1] - 1 : _campaignEnd, _campaignEnd);
+          const _rows = campaignRows.filter(r => r.sheetRow >= _s && r.sheetRow <= _e && r.date);
+          if (!_rows.length) continue;
+          const _first = _rows[0].date, _last = _rows[_rows.length - 1].date;
+          if (todayDate >= _first && todayDate <= _last) {
+            _weekActual = _rows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
+            const _lastRow = _rows[_rows.length - 1];
+            const _prevRow = campaignRows.find(r => r.sheetRow === _s - 1);
+            _weekBudget = Math.max(0, _lastRow.runningBudget - (_prevRow?.runningBudget || 0));
+            break;
+          }
+        }
+        thisWeek = _weekActual;
+        thisWeekBudget = _weekBudget || totalsRow.weeklyBurn;
+      }
       const remaining = Math.max(0, totalBudget - actualToDate);
       const paceDaily = daysToPrimary > 0 ? remaining / daysToPrimary : remaining;
 
       $('thisWeekCard').textContent = money(thisWeek);
-      $('thisWeekMeta').textContent = `of ${money(totalsRow.weeklyBurn)} budget`;
+      $('thisWeekMeta').textContent = `of ${money(thisWeekBudget)} budget`;
       $('remainingCard').textContent = money(remaining);
       $('paceDaily').textContent = `${money(paceDaily)}/day`;
 
@@ -1195,8 +1219,10 @@
       if (!dated.length) { host.textContent = 'No campaign data available.'; return; }
 
       const n = dated.length;
+      const preCampaignSpend = (preCampaign?.googleCum || 0) + (preCampaign?.metaCum || 0);
       const lastActualRow  = getLastActualRow(campaignRows);
       const lastActualDate = lastActualRow ? lastActualRow.date : null;
+      const effectiveLastActualDate = lastActualDate ?? (preCampaignSpend > 0 && dated.length ? dated[0].date : null);
       const burnRate       = get7DayBurnRate(campaignRows, lastActualDate);
 
       // Build planned and actual arrays (both include pre-campaign budget offset)
@@ -1204,10 +1230,11 @@
 
       // Actual: step function (carry forward last known total cumulative spend)
       const actual = [];
-      let lastKnown = 0;
+      let lastKnown = preCampaignSpend;
       dated.forEach(r => {
-        if (lastActualDate && r.date <= lastActualDate) {
-          if (r.googleCum + r.metaCum > 0) lastKnown = r.googleCum + r.metaCum;
+        if (effectiveLastActualDate && r.date <= effectiveLastActualDate) {
+          const cum = r.googleCum + r.metaCum;
+          if (cum > 0) lastKnown = cum;
           actual.push(lastKnown);
         } else {
           actual.push(null);
@@ -1354,7 +1381,11 @@
         ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0))
         : 0;
       if (PRE_CAMPAIGN_BUDGET > 0 || preCampaignSpend > 0) {
-        weeks.unshift({ label: 'Pre-Campaign', actualSpend: preCampaignSpend, plannedSpend: PRE_CAMPAIGN_BUDGET, isFuture: false, barColor: 'var(--dsp)' });
+        const preDiff = PRE_CAMPAIGN_BUDGET > 0
+          ? Math.abs((preCampaignSpend - PRE_CAMPAIGN_BUDGET) / PRE_CAMPAIGN_BUDGET) * 100
+          : (preCampaignSpend === 0 ? 100 : 0);
+        const preColor = preDiff > 25 ? 'var(--bad)' : preDiff > 10 ? 'var(--warn)' : 'var(--good)';
+        weeks.unshift({ label: 'Pre-Campaign', actualSpend: preCampaignSpend, plannedSpend: PRE_CAMPAIGN_BUDGET, isFuture: false, barColor: preColor });
       }
 
       if (!weeks.length) { host.textContent = 'No weekly data.'; return; }
@@ -1396,6 +1427,7 @@
           bars += `<rect x="${bx.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" fill="${w.barColor}" rx="3" opacity="0.88"/>`;
           const planY = yScale(w.plannedSpend).toFixed(1);
           bars += `<line x1="${(bx - 4).toFixed(1)}" y1="${planY}" x2="${(bx + barW + 4).toFixed(1)}" y2="${planY}" stroke="var(--planned)" stroke-width="2.5" stroke-linecap="round"/>`;
+          bars += `<text x="${cx.toFixed(1)}" y="${(parseFloat(planY) - 4).toFixed(1)}" text-anchor="middle" fill="var(--planned)" font-size="9" font-weight="600">${money(w.plannedSpend)}</text>`;
         }
 
         // Rotated x label
