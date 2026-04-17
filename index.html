@@ -493,6 +493,7 @@
     const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/userinfo.email';
     const CAMPAIGN_START = new Date('2026-05-26T00:00:00');
     const PRIMARY_DATE = new Date('2026-08-11T00:00:00');
+    const PRE_CAMPAIGN_BUDGET = 1500;
 
     let tokenClient;
     let accessToken = null;
@@ -705,15 +706,11 @@
       const totalCampaignDays = daysBetween(CAMPAIGN_START, PRIMARY_DATE) + 1;
       if (totalCampaignDays <= 0) return [];
 
-      const preCampaignBase = preCampaign
-        ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0))
-        : 0;
-
       const cumulativeByDate = campaignRows
         .filter((r) => r.date)
         .map((r) => ({
           date: r.date,
-          cumulativeActual: Math.max(0, r.googleCum + r.metaCum - preCampaignBase) + r.dspTotalSpend,
+          cumulativeActual: r.googleCum + r.metaCum + r.dspTotalSpend,
           runningBudget: r.runningBudget
         }))
         .sort((a, b) => a.date - b.date);
@@ -730,13 +727,13 @@
           latestIndex += 1;
           latestCumulative = cumulativeByDate[latestIndex].cumulativeActual;
           if (hasRunningBudget && cumulativeByDate[latestIndex].runningBudget > 0) {
-            latestPlan = cumulativeByDate[latestIndex].runningBudget;
+            latestPlan = cumulativeByDate[latestIndex].runningBudget + PRE_CAMPAIGN_BUDGET;
           }
         }
         return {
           label: dayIndex === 0 || dayIndex === totalCampaignDays - 1 ? toMMDDYYYY(pointDate) : '',
           actual: latestCumulative,
-          plan: hasRunningBudget ? latestPlan : (dayIndex / totalCampaignDays) * totalBudget
+          plan: hasRunningBudget ? latestPlan : PRE_CAMPAIGN_BUDGET + (dayIndex / totalCampaignDays) * totalBudget
         };
       });
     }
@@ -991,7 +988,7 @@
       const effectiveDate = lastActualRow ? lastActualRow.date : todayDate;
       const effectiveRows = campaignRows.filter(r => r.date && r.date <= effectiveDate);
       const effectiveDateRow = effectiveRows.length ? effectiveRows[effectiveRows.length - 1] : null;
-      const budgetedToDate = effectiveDateRow ? effectiveDateRow.runningBudget : 0;
+      const budgetedToDate = (effectiveDateRow ? effectiveDateRow.runningBudget : 0) + PRE_CAMPAIGN_BUDGET;
 
       const delta = actualToDate - budgetedToDate;
       const deltaPct = budgetedToDate ? (delta / budgetedToDate) * 100 : 0;
@@ -1197,24 +1194,20 @@
       const dated = campaignRows.filter(r => r.date).sort((a, b) => a.date - b.date);
       if (!dated.length) { host.textContent = 'No campaign data available.'; return; }
 
-      const preCampaignBase = preCampaign
-        ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0))
-        : 0;
-
       const n = dated.length;
       const lastActualRow  = getLastActualRow(campaignRows);
       const lastActualDate = lastActualRow ? lastActualRow.date : null;
       const burnRate       = get7DayBurnRate(campaignRows, lastActualDate);
 
-      // Build planned and actual arrays
-      const planned = dated.map(r => r.runningBudget);
+      // Build planned and actual arrays (both include pre-campaign budget offset)
+      const planned = dated.map(r => r.runningBudget + PRE_CAMPAIGN_BUDGET);
 
-      // Actual: step function (carry forward last known campaign-only spend)
+      // Actual: step function (carry forward last known total cumulative spend)
       const actual = [];
       let lastKnown = 0;
       dated.forEach(r => {
         if (lastActualDate && r.date <= lastActualDate) {
-          if (r.googleCum + r.metaCum > 0) lastKnown = Math.max(0, r.googleCum + r.metaCum - preCampaignBase);
+          if (r.googleCum + r.metaCum > 0) lastKnown = r.googleCum + r.metaCum;
           actual.push(lastKnown);
         } else {
           actual.push(null);
@@ -1360,8 +1353,8 @@
       const preCampaignSpend = preCampaign
         ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0))
         : 0;
-      if (preCampaignSpend > 0) {
-        weeks.unshift({ label: 'Pre-Campaign', actualSpend: preCampaignSpend, plannedSpend: 0, isFuture: false, barColor: 'var(--dsp)' });
+      if (PRE_CAMPAIGN_BUDGET > 0 || preCampaignSpend > 0) {
+        weeks.unshift({ label: 'Pre-Campaign', actualSpend: preCampaignSpend, plannedSpend: PRE_CAMPAIGN_BUDGET, isFuture: false, barColor: 'var(--dsp)' });
       }
 
       if (!weeks.length) { host.textContent = 'No weekly data.'; return; }
