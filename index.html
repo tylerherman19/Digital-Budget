@@ -159,6 +159,65 @@
       overflow: visible;
     }
     .hidden { display: none; }
+    /* ── Pacing & Analysis tab styles ────────────────────────────────── */
+    .status-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .badge-good { background: rgba(47,107,47,0.15); color: var(--good); }
+    .badge-warn { background: rgba(245,158,11,0.18); color: #b45309; }
+    .badge-bad  { background: rgba(239,68,68,0.15);  color: #991b1b; }
+    .badge-paid   { background: rgba(47,107,47,0.15);  color: var(--good); }
+    .badge-unpaid { background: rgba(245,158,11,0.18); color: #b45309; }
+    .pacing-dot {
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      margin-right: 7px;
+      flex-shrink: 0;
+    }
+    .stale-notice {
+      font-size: 0.82rem;
+      color: #92400e;
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.35);
+      border-radius: 8px;
+      padding: 7px 11px;
+      margin-top: 10px;
+    }
+    .freshness-warning {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #991b1b;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.35);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-top: 10px;
+    }
+    .dsp-payment-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .dsp-payment-row:last-child { border-bottom: none; }
+    .dsp-toggle-btn { font-size: 0.8rem; padding: 5px 12px; border-radius: 8px; }
+    .at-risk-card {
+      border-color: var(--warn) !important;
+      background: rgba(245,158,11,0.06) !important;
+    }
+    .weekly-chart-svg { width: 100%; overflow: visible; display: block; }
     .error {
       margin-top: 12px;
       background: rgba(239, 68, 68, 0.14);
@@ -186,6 +245,7 @@
       <div class="tabbar">
         <button id="summaryTabBtn" class="tab-btn active">Summary</button>
         <button id="insightsTabBtn" class="tab-btn">Insights & Charts</button>
+        <button id="pacingTabBtn" class="tab-btn">Pacing &amp; Analysis</button>
       </div>
 
       <div id="summaryTab" class="tab-panel">
@@ -309,6 +369,117 @@
             <span class="muted">Combined lifetime spend</span><span id="lifetimeTotal">$0</span>
           </div>
         </section>
+      </div>
+      <div id="pacingTab" class="tab-panel hidden">
+        <div class="grid">
+
+          <!-- Feature 1: Pacing Status -->
+          <section class="card" id="pacingStatusCard">
+            <h2 style="font-size:1.25rem;margin-bottom:10px;">Pacing Status</h2>
+            <div class="kvs">
+              <span class="muted">Budgeted to date</span><span id="pacingBudgeted">$0</span>
+              <span class="muted">Actual to date</span><span id="pacingActual">$0</span>
+              <span class="muted">Delta ($)</span><span id="pacingDeltaDollar">$0</span>
+              <span class="muted">Delta (%)</span><span id="pacingStatusDeltaPct">0%</span>
+            </div>
+            <div style="display:flex;align-items:center;margin-top:12px;">
+              <span class="pacing-dot" id="pacingDot" style="background:var(--bar)"></span>
+              <span id="pacingStatusLabel" style="font-size:0.9rem;font-weight:600;">—</span>
+            </div>
+            <div id="pacingStaleNotice" class="stale-notice hidden"></div>
+          </section>
+
+          <!-- Feature 2: Campaign Clock -->
+          <section class="card" id="campaignClockCard">
+            <h2 style="font-size:1.25rem;margin-bottom:10px;">Campaign Clock</h2>
+            <div class="kvs">
+              <span class="muted">Days to primary</span><span id="clockDaysToPrimary">—</span>
+              <span class="muted">Total campaign days</span><span id="clockTotalDays">—</span>
+              <span class="muted">Days elapsed</span><span id="clockElapsedDays">—</span>
+              <span class="muted">Campaign elapsed</span><span id="clockElapsedPct">0%</span>
+              <span class="muted">Budget spent (N82)</span><span id="clockBudgetSpentPct">0%</span>
+            </div>
+          </section>
+
+          <!-- Feature 3: Projected Final Spend -->
+          <section class="card" id="projectedSpendCard">
+            <h2 style="font-size:1.25rem;margin-bottom:10px;">Projected Final Spend</h2>
+            <div class="kvs">
+              <span class="muted">7-day avg burn (G+M)</span><span id="projBurnRate">$0/day</span>
+              <span class="muted">Projected total</span><span id="projTotal">$0</span>
+              <span class="muted">Total budget (N82)</span><span id="projTotalBudget">$0</span>
+              <span class="muted">Projected variance</span><span id="projVariance">$0</span>
+              <span class="muted">Variance %</span><span id="projVariancePct">0%</span>
+            </div>
+          </section>
+
+          <!-- Feature 4: Data Freshness -->
+          <section class="card" id="freshnessCard">
+            <h2 style="font-size:1.25rem;margin-bottom:10px;">Data Freshness</h2>
+            <div class="kvs">
+              <span class="muted">Last entry date</span><span id="freshnessDate">—</span>
+              <span class="muted">How long ago</span><span id="freshnessDaysAgo">—</span>
+            </div>
+            <div id="freshnessWarning" class="freshness-warning hidden"></div>
+          </section>
+
+        </div>
+
+        <!-- Feature 5: Channel Budget Remaining -->
+        <section class="card" style="margin-top:12px;">
+          <h2 style="font-size:1.5rem;margin-bottom:10px;">Channel Budget Remaining</h2>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Channel</th>
+                  <th>Allocated</th>
+                  <th>Spent</th>
+                  <th>Remaining</th>
+                  <th>% Used</th>
+                  <th>Projected Final</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="channelRemainingBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Feature 6: Cumulative Spend vs Plan Chart -->
+        <section class="card" style="margin-top:12px;">
+          <h2 style="font-size:1.5rem;margin-bottom:8px;">Cumulative Spend vs Plan</h2>
+          <div class="legend">
+            <span><span class="swatch" style="background:var(--planned)"></span>Planned (Col P)</span>
+            <span><span class="swatch" style="background:var(--accent)"></span>Actual</span>
+            <span><span class="swatch" style="background:var(--accent);opacity:0.55"></span>Projected</span>
+            <span><span class="swatch" style="background:var(--dsp)"></span>DSP Payment</span>
+          </div>
+          <div id="cumulativePlanChart" class="line-chart"></div>
+        </section>
+
+        <!-- Feature 7: Weekly Spend Bar Chart -->
+        <section class="card" style="margin-top:12px;">
+          <h2 style="font-size:1.5rem;margin-bottom:8px;">Weekly Spend vs Plan</h2>
+          <div class="legend">
+            <span><span class="swatch" style="background:var(--good)"></span>Within ±10% of plan</span>
+            <span><span class="swatch" style="background:var(--warn)"></span>10–25% off plan</span>
+            <span><span class="swatch" style="background:var(--bad)"></span>&gt;25% off / zero (past)</span>
+            <span><span class="swatch" style="background:none;border:2px solid var(--planned);border-radius:50%"></span>Future planned</span>
+          </div>
+          <div id="weeklyBarChart" style="width:100%;overflow-x:auto;"></div>
+        </section>
+
+        <!-- Feature 8: DSPolitical Payment Tracker -->
+        <section class="card" id="dspTrackerSection" style="margin-top:12px;">
+          <h2 style="font-size:1.5rem;margin-bottom:10px;">DSPolitical Payment Tracker</h2>
+          <div id="dspPaymentRows"></div>
+          <div class="kvs" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+            <span class="muted">Total committed</span><span id="dspTotalCommitted">$0</span>
+            <span class="muted">Total paid</span><span id="dspTotalPaid">$0</span>
+          </div>
+        </section>
+
       </div>
     </div>
 
@@ -717,6 +888,7 @@
 
       renderStackedWeeklyChart(weeklySeries);
       renderLineChart('cumulativeBurnChart', burnSeries);
+      renderNewFeatures(data);
     }
 
     async function loadSheetData() {
@@ -752,6 +924,557 @@
         summaryTab.classList.add('hidden');
       });
     }
+
+    // ── Pacing & Analysis — helpers ───────────────────────────────────────────
+
+    const META_REACH_IDX = 8;
+
+    let _lastRenderData = null;
+
+    function getPrimaryDateDynamic(campaignRows) {
+      const dated = campaignRows.filter(r => r.date).sort((a, b) => a.date - b.date);
+      return dated.length ? dated[dated.length - 1].date : null;
+    }
+
+    function getLastActualRow(campaignRows) {
+      const rows = campaignRows.filter(r => r.date && (r.googleCum > 0 || r.metaCum > 0));
+      return rows.length ? rows[rows.length - 1] : null;
+    }
+
+    function getActualThroughDate(campaignRows, effectiveDate) {
+      const rows = campaignRows.filter(r => r.date && r.date <= effectiveDate);
+      const googleMeta = rows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
+      const dsp = computePaidDSP(campaignRows, effectiveDate);
+      return { googleMeta, dsp, total: googleMeta + dsp };
+    }
+
+    function get7DayBurnRate(campaignRows, lastActualDate) {
+      if (!lastActualDate) return 0;
+      const rows = campaignRows.filter(r => r.date && r.date <= lastActualDate).slice(-7);
+      if (!rows.length) return 0;
+      return rows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0) / rows.length;
+    }
+
+    function getDSPPaymentStatus(sheetRow, campaignRows, todayDate) {
+      const stored = localStorage.getItem(`dsp_payment_${sheetRow}`);
+      if (stored !== null) return stored === 'paid';
+      const rowIdx = campaignRows.findIndex(r => r.sheetRow === sheetRow);
+      if (rowIdx < 0) return false;
+      const row = campaignRows[rowIdx];
+      if (!row.date || row.date > todayDate) return false;
+      return campaignRows.slice(rowIdx + 1).some(r => r.date && r.date <= todayDate && (r.googleDaily + r.metaDaily) > 0);
+    }
+
+    // ── Feature 1: Pacing Status ──────────────────────────────────────────────
+
+    function renderPacingStatus(campaignRows, totalsRow, preCampaign) {
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const lastActualRow = getLastActualRow(campaignRows);
+      const effectiveDate = lastActualRow ? lastActualRow.date : todayDate;
+      const effectiveRows = campaignRows.filter(r => r.date && r.date <= effectiveDate);
+      const effectiveDateRow = effectiveRows.length ? effectiveRows[effectiveRows.length - 1] : null;
+
+      const budgetedToDate = effectiveDateRow ? effectiveDateRow.runningBudget : 0;
+      const { total: actualToDate } = getActualThroughDate(campaignRows, effectiveDate);
+
+      const delta = actualToDate - budgetedToDate;
+      const deltaPct = budgetedToDate ? (delta / budgetedToDate) * 100 : 0;
+      const absPct = Math.abs(deltaPct);
+
+      let colorClass, statusText, dotColor;
+      if (delta > 0) {
+        colorClass = 'bad';  statusText = 'Overspend';          dotColor = 'var(--bad)';
+      } else if (absPct > 25) {
+        colorClass = 'bad';  statusText = '>25% Under Plan';    dotColor = 'var(--bad)';
+      } else if (absPct > 10) {
+        colorClass = 'warn'; statusText = '10–25% Under Plan';  dotColor = 'var(--warn)';
+      } else {
+        colorClass = 'good'; statusText = 'On Plan';            dotColor = 'var(--good)';
+      }
+
+      $('pacingBudgeted').textContent = money(budgetedToDate);
+      $('pacingActual').textContent   = money(actualToDate);
+      const sign = delta >= 0 ? '+' : '';
+      $('pacingDeltaDollar').textContent = `${sign}${money(delta)}`;
+      $('pacingDeltaDollar').className   = colorClass;
+      $('pacingStatusDeltaPct').textContent = `${sign}${absPct.toFixed(1)}%`;
+      $('pacingStatusDeltaPct').className   = colorClass;
+      $('pacingDot').style.background    = dotColor;
+      $('pacingStatusLabel').textContent = statusText;
+      $('pacingStatusLabel').className   = colorClass;
+
+      const staleEl = $('pacingStaleNotice');
+      const daysAgo = daysBetween(effectiveDate, todayDate);
+      if (lastActualRow && daysAgo > 0) {
+        staleEl.textContent = `Data as of ${toMMDDYYYY(effectiveDate)} (${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago) — pacing reflects that date`;
+        staleEl.classList.remove('hidden');
+      } else {
+        staleEl.classList.add('hidden');
+      }
+    }
+
+    // ── Feature 2: Campaign Clock ─────────────────────────────────────────────
+
+    function renderCampaignClock(campaignRows, totalsRow) {
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const dated = campaignRows.filter(r => r.date).sort((a, b) => a.date - b.date);
+      const firstDay    = dated.length ? dated[0].date : null;
+      const primaryDate = dated.length ? dated[dated.length - 1].date : null;
+
+      const totalDays   = (firstDay && primaryDate) ? daysBetween(firstDay, primaryDate) + 1 : 0;
+      const elapsedDays = firstDay ? Math.max(0, Math.min(totalDays, daysBetween(firstDay, todayDate) + 1)) : 0;
+      const daysToPrim  = primaryDate ? Math.max(0, daysBetween(todayDate, primaryDate)) : 0;
+      const elapsedPct  = totalDays ? (elapsedDays / totalDays) * 100 : 0;
+
+      const totalBudgetN82 = totalsRow.dailyTotalBudget;
+      const { total: actualToDate } = getActualThroughDate(campaignRows, todayDate);
+      const budgetSpentPct = totalBudgetN82 ? (actualToDate / totalBudgetN82) * 100 : 0;
+
+      $('clockDaysToPrimary').textContent  = daysToPrim;
+      $('clockTotalDays').textContent      = totalDays;
+      $('clockElapsedDays').textContent    = elapsedDays;
+      $('clockElapsedPct').textContent     = pct(elapsedPct);
+      $('clockBudgetSpentPct').textContent = pct(budgetSpentPct);
+
+      const card = $('campaignClockCard');
+      if ((elapsedPct - budgetSpentPct) > 15) {
+        card.classList.add('at-risk-card');
+      } else {
+        card.classList.remove('at-risk-card');
+      }
+    }
+
+    // ── Feature 3: Projected Final Spend ─────────────────────────────────────
+
+    function renderProjectedFinalSpend(campaignRows, totalsRow) {
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const lastActualRow  = getLastActualRow(campaignRows);
+      const lastActualDate = lastActualRow ? lastActualRow.date : null;
+      const primaryDate    = getPrimaryDateDynamic(campaignRows);
+      const daysRemaining  = primaryDate ? Math.max(0, daysBetween(todayDate, primaryDate)) : 0;
+      const burnRate       = get7DayBurnRate(campaignRows, lastActualDate);
+
+      const { dsp: paidDSP, total: actualToDate } = getActualThroughDate(campaignRows, todayDate);
+      const totalDSP  = campaignRows.reduce((s, r) => s + r.dspCommitment, 0);
+      const unpaidDSP = Math.max(0, totalDSP - paidDSP);
+
+      const projectedTotal  = actualToDate + burnRate * daysRemaining + unpaidDSP;
+      const totalBudgetN82  = totalsRow.dailyTotalBudget;
+      const projVariance    = projectedTotal - totalBudgetN82;
+      const projVariancePct = totalBudgetN82 ? (projVariance / totalBudgetN82) * 100 : 0;
+
+      let sc;
+      if (projVariance > 0)                       sc = 'bad';
+      else if (Math.abs(projVariancePct) > 10)    sc = 'warn';
+      else                                         sc = 'good';
+
+      $('projBurnRate').textContent      = `${money(burnRate)}/day`;
+      $('projTotal').textContent         = money(projectedTotal);
+      $('projTotalBudget').textContent   = money(totalBudgetN82);
+      const vs = projVariance >= 0 ? '+' : '';
+      $('projVariance').textContent      = `${vs}${money(projVariance)}`;
+      $('projVariance').className        = sc;
+      $('projVariancePct').textContent   = `${vs}${Math.abs(projVariancePct).toFixed(1)}%`;
+      $('projVariancePct').className     = sc;
+    }
+
+    // ── Feature 4: Data Freshness ─────────────────────────────────────────────
+
+    function renderDataFreshness(campaignRows) {
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const lastActualRow = getLastActualRow(campaignRows);
+      const card = $('freshnessCard');
+      const warningEl = $('freshnessWarning');
+
+      if (lastActualRow && lastActualRow.date) {
+        const daysAgo = daysBetween(lastActualRow.date, todayDate);
+        $('freshnessDate').textContent    = toMMDDYYYY(lastActualRow.date);
+        $('freshnessDaysAgo').textContent = daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago`;
+        if (daysAgo > 2) {
+          warningEl.textContent = `⚠ Dashboard data may be stale — last entry was ${daysAgo} days ago`;
+          warningEl.classList.remove('hidden');
+          card.classList.add('at-risk-card');
+        } else {
+          warningEl.classList.add('hidden');
+          card.classList.remove('at-risk-card');
+        }
+      } else {
+        $('freshnessDate').textContent    = 'No actuals entered yet';
+        $('freshnessDaysAgo').textContent = '—';
+        warningEl.classList.add('hidden');
+        card.classList.remove('at-risk-card');
+      }
+    }
+
+    // ── Feature 5: Channel Budget Remaining ──────────────────────────────────
+
+    function renderChannelBudgetTable(campaignRows, totalsRow) {
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const lastActualRow  = getLastActualRow(campaignRows);
+      const lastActualDate = lastActualRow ? lastActualRow.date : null;
+      const primaryDate    = getPrimaryDateDynamic(campaignRows);
+      const daysRemaining  = primaryDate ? Math.max(0, daysBetween(todayDate, primaryDate)) : 0;
+      const burnRate7      = get7DayBurnRate(campaignRows, lastActualDate);
+
+      const googleDisplayAlloc = totalsRow.googleDisplayBudget;
+      const googleSearchAlloc  = totalsRow.googleSearchBudget;
+      const googleAlloc        = googleDisplayAlloc + googleSearchAlloc;
+      const metaReachAlloc     = parseMoney(totalsRow.raw ? totalsRow.raw[META_REACH_IDX] : 0);
+      const metaVoterAlloc     = totalsRow.metaVoterFile;
+      const metaAlloc          = metaReachAlloc + metaVoterAlloc;
+      const dspAlloc           = totalsRow.dspCommitment;
+
+      const toDateRows      = campaignRows.filter(r => r.date && r.date <= todayDate);
+      const googleTotalSpent = toDateRows.reduce((s, r) => s + r.googleDaily, 0);
+      const metaTotalSpent   = toDateRows.reduce((s, r) => s + r.metaDaily, 0);
+      const dspSpent         = computePaidDSP(campaignRows, todayDate);
+
+      const gDispSpent  = googleAlloc > 0 ? googleTotalSpent * (googleDisplayAlloc / googleAlloc) : 0;
+      const gSrchSpent  = googleAlloc > 0 ? googleTotalSpent * (googleSearchAlloc  / googleAlloc) : 0;
+      const mReachSpent = metaAlloc   > 0 ? metaTotalSpent  * (metaReachAlloc      / metaAlloc)   : 0;
+      const mVoterSpent = metaAlloc   > 0 ? metaTotalSpent  * (metaVoterAlloc      / metaAlloc)   : 0;
+
+      const gDispBurn  = googleAlloc > 0 ? burnRate7 * (googleDisplayAlloc / googleAlloc) : 0;
+      const gSrchBurn  = googleAlloc > 0 ? burnRate7 * (googleSearchAlloc  / googleAlloc) : 0;
+      const mReachBurn = metaAlloc   > 0 ? burnRate7 * (metaReachAlloc      / metaAlloc)   : 0;
+      const mVoterBurn = metaAlloc   > 0 ? burnRate7 * (metaVoterAlloc      / metaAlloc)   : 0;
+
+      const channels = [
+        { name: 'Google Display',    alloc: googleDisplayAlloc, spent: gDispSpent,  projFinal: gDispSpent  + gDispBurn  * daysRemaining },
+        { name: 'Google Search',     alloc: googleSearchAlloc,  spent: gSrchSpent,  projFinal: gSrchSpent  + gSrchBurn  * daysRemaining },
+        { name: 'Meta Reach',        alloc: metaReachAlloc,     spent: mReachSpent, projFinal: mReachSpent + mReachBurn * daysRemaining },
+        { name: 'Meta Voter File',   alloc: metaVoterAlloc,     spent: mVoterSpent, projFinal: mVoterSpent + mVoterBurn * daysRemaining },
+        { name: 'DSPolitical',       alloc: dspAlloc,           spent: dspSpent,    projFinal: dspAlloc }
+      ];
+
+      const tbody = $('channelRemainingBody');
+      tbody.innerHTML = '';
+      channels.forEach(ch => {
+        const remaining = ch.alloc - ch.spent;
+        const usedPct   = ch.alloc ? (ch.spent / ch.alloc) * 100 : 0;
+        let status, sCls;
+        if (remaining <= 0)            { status = 'Exhausted'; sCls = 'badge-bad';  }
+        else if (ch.projFinal > ch.alloc) { status = 'At Risk';   sCls = 'badge-warn'; }
+        else                           { status = 'On Track';  sCls = 'badge-good'; }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${ch.name}</td><td>${money(ch.alloc)}</td><td>${money(ch.spent)}</td><td>${money(remaining)}</td><td>${pct(usedPct)}</td><td>${money(ch.projFinal)}</td><td><span class="status-badge ${sCls}">${status}</span></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ── Feature 6: Cumulative Spend vs Plan Chart ─────────────────────────────
+
+    function renderCumulativeVsPlanChart(campaignRows, totalsRow) {
+      const host = $('cumulativePlanChart');
+      host.innerHTML = '';
+
+      const dated = campaignRows.filter(r => r.date).sort((a, b) => a.date - b.date);
+      if (!dated.length) { host.textContent = 'No campaign data available.'; return; }
+
+      const n = dated.length;
+      const lastActualRow  = getLastActualRow(campaignRows);
+      const lastActualDate = lastActualRow ? lastActualRow.date : null;
+      const burnRate       = get7DayBurnRate(campaignRows, lastActualDate);
+
+      // Build planned and actual arrays
+      const planned = dated.map(r => r.runningBudget);
+
+      // Actual: step function (carry forward last known googleCum + metaCum)
+      const actual = [];
+      let lastKnown = 0;
+      dated.forEach(r => {
+        if (lastActualDate && r.date <= lastActualDate) {
+          if (r.googleCum + r.metaCum > 0) lastKnown = r.googleCum + r.metaCum;
+          actual.push(lastKnown);
+        } else {
+          actual.push(null);
+        }
+      });
+
+      // Find index of last actual point
+      let lastActualIdx = -1;
+      actual.forEach((v, i) => { if (v !== null) lastActualIdx = i; });
+
+      // Build projected path (from last actual onward, using burn rate)
+      const projBase = lastActualIdx >= 0 ? actual[lastActualIdx] : null;
+
+      const width = 1000, height = 260;
+      const pad = { top: 20, right: 20, bottom: 44, left: 72 };
+      const chartW = width - pad.left - pad.right;
+      const chartH = height - pad.top - pad.bottom;
+
+      let projMax = 0;
+      if (projBase !== null && burnRate > 0) {
+        projMax = projBase + burnRate * (n - 1 - lastActualIdx);
+      }
+      const maxY = Math.max(1, ...planned, ...actual.filter(v => v !== null), projMax);
+
+      const xScale = i => pad.left + (i / Math.max(1, n - 1)) * chartW;
+      const yScale = v => pad.top  + chartH - (v / maxY) * chartH;
+
+      // Y gridlines
+      let grid = '';
+      for (let t = 0; t <= 4; t++) {
+        const ratio = t / 4;
+        const val = maxY * (1 - ratio);
+        const yy  = pad.top + chartH * ratio;
+        grid += `<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" stroke="#d1d5db" stroke-width="1"/>`;
+        grid += `<text x="${pad.left - 6}" y="${yy + 4}" text-anchor="end" fill="#6b7280" font-size="11">${money(val)}</text>`;
+      }
+
+      // X axis + date labels
+      const axisLine = `<line x1="${pad.left}" y1="${pad.top + chartH}" x2="${width - pad.right}" y2="${pad.top + chartH}" stroke="#9ca3af" stroke-width="1"/>`;
+      let xLabels = `<text x="${xScale(0).toFixed(1)}" y="${height - 4}" text-anchor="start" fill="#6b7280" font-size="11">${toMMDDYYYY(dated[0].date)}</text>`;
+      xLabels    += `<text x="${xScale(n - 1).toFixed(1)}" y="${height - 4}" text-anchor="end" fill="#6b7280" font-size="11">${toMMDDYYYY(dated[n - 1].date)}</text>`;
+      dated.forEach((r, i) => {
+        if (r.date && r.date.getDate() === 1) {
+          const xp = xScale(i).toFixed(1);
+          xLabels += `<line x1="${xp}" y1="${pad.top}" x2="${xp}" y2="${pad.top + chartH}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 4"/>`;
+          xLabels += `<text x="${xp}" y="${height - 4}" text-anchor="middle" fill="#6b7280" font-size="11">${new Intl.DateTimeFormat('en-US', { month: 'short' }).format(r.date)}</text>`;
+        }
+      });
+
+      // Planned path
+      const plannedPath = dated.map((r, i) => `${i === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(planned[i]).toFixed(1)}`).join(' ');
+
+      // Actual path
+      const actSegs = [];
+      actual.forEach((v, i) => {
+        if (v !== null) actSegs.push(`${actSegs.length === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(v).toFixed(1)}`);
+      });
+      const actualPath = actSegs.join(' ');
+
+      // Projected path (only if burn rate > 0 and actuals exist)
+      let projPath = '';
+      if (projBase !== null && burnRate > 0) {
+        const pSegs = [];
+        dated.forEach((r, i) => {
+          if (i >= lastActualIdx) {
+            const pv = projBase + burnRate * (i - lastActualIdx);
+            pSegs.push(`${pSegs.length === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(pv).toFixed(1)}`);
+          }
+        });
+        projPath = pSegs.join(' ');
+      }
+
+      // DSP markers
+      let dspMarkers = '';
+      campaignRows.filter(r => r.date && r.dspCommitment > 0).forEach(r => {
+        const i = dated.findIndex(d => d.date && d.date.getTime() === r.date.getTime());
+        if (i >= 0) {
+          const xp = xScale(i).toFixed(1);
+          dspMarkers += `<line x1="${xp}" y1="${pad.top}" x2="${xp}" y2="${pad.top + chartH}" stroke="var(--dsp)" stroke-width="2" stroke-dasharray="4 3"/>`;
+          dspMarkers += `<text x="${(parseFloat(xp) + 5).toFixed(1)}" y="${(pad.top + 16).toFixed(1)}" fill="var(--dsp)" font-size="11" font-weight="600">${money(r.dspCommitment)}</text>`;
+        }
+      });
+
+      host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Cumulative spend vs plan">
+        ${grid}${axisLine}${xLabels}${dspMarkers}
+        <path d="${plannedPath}" fill="none" stroke="var(--planned)" stroke-width="2.5" stroke-dasharray="8 5" stroke-linejoin="round"/>
+        ${actualPath ? `<path d="${actualPath}" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+        ${projPath   ? `<path d="${projPath}"   fill="none" stroke="var(--accent)" stroke-width="2"   stroke-dasharray="6 4" opacity="0.6" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+      </svg>`;
+    }
+
+    // ── Feature 7: Weekly Spend Bar Chart ─────────────────────────────────────
+
+    function renderWeeklyBarChart(campaignRows, totalsRow) {
+      const host = $('weeklyBarChart');
+      host.innerHTML = '';
+      if (!campaignRows.length) { host.textContent = 'No data.'; return; }
+
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const weekStarts   = [2, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
+      const campaignEnd  = 80;
+      const weekRanges   = weekStarts.map((start, idx) => {
+        const nextStart = weekStarts[idx + 1];
+        return { start: Math.max(start, 3), end: Math.min(nextStart ? nextStart - 1 : campaignEnd, campaignEnd) };
+      }).filter(({ start, end }) => start <= end);
+
+      const weeks = weekRanges.map(({ start, end }) => {
+        const rows = campaignRows.filter(r => r.sheetRow >= start && r.sheetRow <= end);
+        if (!rows.length) return null;
+
+        const firstRow = rows[0];
+        const lastRow  = rows[rows.length - 1];
+        const actualSpend = rows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
+
+        const firstRowIdx = campaignRows.indexOf(firstRow);
+        const prevRow     = firstRowIdx > 0 ? campaignRows[firstRowIdx - 1] : null;
+        const prevPlanned = prevRow ? prevRow.runningBudget : 0;
+        const plannedSpend = Math.max(0, lastRow.runningBudget - prevPlanned);
+
+        const isFuture = firstRow.date && firstRow.date > todayDate;
+        const isPast   = lastRow.date  && lastRow.date  < todayDate;
+
+        let barColor = 'var(--accent)';
+        if (!isFuture) {
+          const diff = plannedSpend > 0
+            ? Math.abs((actualSpend - plannedSpend) / plannedSpend) * 100
+            : (actualSpend === 0 ? 100 : 0);
+          if (isPast && actualSpend === 0) barColor = 'var(--bad)';
+          else if (diff > 25)             barColor = 'var(--bad)';
+          else if (diff > 10)             barColor = 'var(--warn)';
+          else                            barColor = 'var(--good)';
+        }
+
+        const fl = firstRow.label || (firstRow.date ? toMMDDYYYY(firstRow.date) : '');
+        const ll = lastRow.label  || (lastRow.date  ? toMMDDYYYY(lastRow.date)  : '');
+        const label = fl && ll && fl !== ll ? `${fl}–${ll}` : (fl || ll || `Row ${start}`);
+
+        return { label, actualSpend, plannedSpend, isFuture, barColor };
+      }).filter(Boolean);
+
+      if (!weeks.length) { host.textContent = 'No weekly data.'; return; }
+
+      const n     = weeks.length;
+      const svgW  = 1000, svgH = 320;
+      const pad   = { top: 20, right: 20, bottom: 80, left: 72 };
+      const chartW = svgW - pad.left - pad.right;
+      const chartH = svgH - pad.top  - pad.bottom;
+      const slotW  = chartW / n;
+      const barW   = slotW * 0.62;
+      const maxVal = Math.max(1, ...weeks.map(w => Math.max(w.actualSpend, w.plannedSpend)));
+
+      const yScale  = v => pad.top + chartH - (v / maxVal) * chartH;
+      const xCenter = i => pad.left + (i + 0.5) * slotW;
+
+      let gridLines = '';
+      for (let t = 0; t <= 4; t++) {
+        const ratio = t / 4;
+        const val   = maxVal * (1 - ratio);
+        const yy    = pad.top + chartH * ratio;
+        gridLines += `<line x1="${pad.left}" y1="${yy}" x2="${svgW - pad.right}" y2="${yy}" stroke="#e5e7eb" stroke-width="1"/>`;
+        gridLines += `<text x="${pad.left - 6}" y="${yy + 4}" text-anchor="end" fill="#6b7280" font-size="11">${money(val)}</text>`;
+      }
+      const axisLine = `<line x1="${pad.left}" y1="${pad.top + chartH}" x2="${svgW - pad.right}" y2="${pad.top + chartH}" stroke="#9ca3af" stroke-width="1"/>`;
+
+      let bars = '';
+      weeks.forEach((w, i) => {
+        const cx  = xCenter(i);
+        const bx  = cx - barW / 2;
+
+        if (w.isFuture) {
+          const barH = Math.max(1, (w.plannedSpend / maxVal) * chartH);
+          const barY = yScale(w.plannedSpend);
+          bars += `<rect x="${bx.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" fill="none" stroke="var(--planned)" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>`;
+        } else {
+          const barH = Math.max(1, (w.actualSpend / maxVal) * chartH);
+          const barY = yScale(w.actualSpend);
+          bars += `<rect x="${bx.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" fill="${w.barColor}" rx="3" opacity="0.88"/>`;
+          const planY = yScale(w.plannedSpend).toFixed(1);
+          bars += `<line x1="${(bx - 4).toFixed(1)}" y1="${planY}" x2="${(bx + barW + 4).toFixed(1)}" y2="${planY}" stroke="var(--planned)" stroke-width="2.5" stroke-linecap="round"/>`;
+        }
+
+        // Rotated x label
+        const labelX = cx.toFixed(1);
+        const labelY = (svgH - pad.bottom + 12).toFixed(1);
+        bars += `<text transform="translate(${labelX},${labelY}) rotate(-38)" text-anchor="end" fill="#6b7280" font-size="9">${w.label.split('–')[0]}</text>`;
+      });
+
+      host.innerHTML = `<svg viewBox="0 0 ${svgW} ${svgH}" class="weekly-chart-svg" role="img" aria-label="Weekly spend bar chart">
+        ${gridLines}${axisLine}${bars}
+      </svg>`;
+    }
+
+    // ── Feature 8: DSPolitical Payment Tracker ────────────────────────────────
+
+    function renderDSPTracker(campaignRows, totalsRow) {
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const dspRows  = campaignRows.filter(r => r.dspCommitment > 0);
+      const container = $('dspPaymentRows');
+      container.innerHTML = '';
+
+      let totalCommitted = 0;
+      let totalPaid      = 0;
+
+      dspRows.forEach((row) => {
+        const paid = getDSPPaymentStatus(row.sheetRow, campaignRows, todayDate);
+        totalCommitted += row.dspCommitment;
+        if (paid) totalPaid += row.dspCommitment;
+
+        const dateLabel = row.date ? toMMDDYYYY(row.date) : (row.label || `Sheet row ${row.sheetRow}`);
+        const div = document.createElement('div');
+        div.className = 'dsp-payment-row';
+        div.innerHTML = `
+          <div>
+            <div style="font-weight:600;font-size:1rem;">${money(row.dspCommitment)}</div>
+            <div class="muted" style="font-size:0.84rem;">${dateLabel}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="status-badge ${paid ? 'badge-paid' : 'badge-unpaid'}" id="dspBadge_${row.sheetRow}">${paid ? 'PAID' : 'UNPAID'}</span>
+            <button class="dsp-toggle-btn" data-row="${row.sheetRow}">Toggle</button>
+          </div>`;
+        div.querySelector('.dsp-toggle-btn').addEventListener('click', () => {
+          const key     = `dsp_payment_${row.sheetRow}`;
+          const current = getDSPPaymentStatus(row.sheetRow, campaignRows, todayDate);
+          localStorage.setItem(key, current ? 'unpaid' : 'paid');
+          if (_lastRenderData) renderDSPTracker(_lastRenderData.campaignRows, _lastRenderData.totalsRow);
+        });
+        container.appendChild(div);
+      });
+
+      if (!dspRows.length) {
+        container.innerHTML = '<div class="muted" style="padding:12px 0;">No DSPolitical commitments found in sheet (column L).</div>';
+      }
+
+      $('dspTotalCommitted').textContent = money(totalCommitted);
+      $('dspTotalPaid').textContent      = money(totalPaid);
+    }
+
+    // ── Orchestrator ──────────────────────────────────────────────────────────
+
+    function renderNewFeatures(data) {
+      _lastRenderData = data;
+      const { campaignRows, totalsRow, preCampaign } = data;
+      if (!totalsRow || !campaignRows) return;
+      renderPacingStatus(campaignRows, totalsRow, preCampaign);
+      renderCampaignClock(campaignRows, totalsRow);
+      renderProjectedFinalSpend(campaignRows, totalsRow);
+      renderDataFreshness(campaignRows);
+      renderChannelBudgetTable(campaignRows, totalsRow);
+      renderCumulativeVsPlanChart(campaignRows, totalsRow);
+      renderWeeklyBarChart(campaignRows, totalsRow);
+      renderDSPTracker(campaignRows, totalsRow);
+    }
+
+    // ── Pacing tab wiring (additive — does not touch existing setupTabs) ──────
+    document.addEventListener('DOMContentLoaded', () => {
+      const pacingTabBtn = $('pacingTabBtn');
+      const pacingTab    = $('pacingTab');
+      // When other tabs activate, also hide pacing tab
+      $('summaryTabBtn').addEventListener('click', () => {
+        pacingTab.classList.add('hidden');
+        pacingTabBtn.classList.remove('active');
+      });
+      $('insightsTabBtn').addEventListener('click', () => {
+        pacingTab.classList.add('hidden');
+        pacingTabBtn.classList.remove('active');
+      });
+      // Pacing tab button activates its panel and deactivates the others
+      pacingTabBtn.addEventListener('click', () => {
+        pacingTabBtn.classList.add('active');
+        $('summaryTabBtn').classList.remove('active');
+        $('insightsTabBtn').classList.remove('active');
+        pacingTab.classList.remove('hidden');
+        $('summaryTab').classList.add('hidden');
+        $('insightsTab').classList.add('hidden');
+      });
+    });
 
     document.addEventListener('DOMContentLoaded', async () => {
       $('signInBtn').addEventListener('click', handleSignIn);
