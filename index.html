@@ -941,14 +941,12 @@
       return rows.length ? rows[rows.length - 1] : null;
     }
 
-    function getActualThroughDate(campaignRows, effectiveDate, preCampaign) {
-      const rows = campaignRows.filter(r => r.date && r.date <= effectiveDate);
-      const campaignGM = rows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
-      // Include pre-campaign spend (row 2) — real money already spent
-      const preGM = preCampaign ? (preCampaign.googleCum || 0) + (preCampaign.metaCum || 0) : 0;
-      const googleMeta = campaignGM + preGM;
-      const dsp = computePaidDSP(campaignRows, effectiveDate);
-      return { googleMeta, dsp, total: googleMeta + dsp };
+    // D82 and E82 are the authoritative cumulative actuals — use totalsRow directly.
+    function getActualTotal(totalsRow, campaignRows) {
+      const google = totalsRow ? (totalsRow.googleCum || 0) : 0;
+      const meta   = totalsRow ? (totalsRow.metaCum   || 0) : 0;
+      const dsp    = totalsRow ? (totalsRow.dspTotalSpend || computePaidDSP(campaignRows, new Date())) : 0;
+      return { google, meta, dsp, total: google + meta + dsp };
     }
 
     function get7DayBurnRate(campaignRows, lastActualDate) {
@@ -970,17 +968,19 @@
 
     // ── Feature 1: Pacing Status ──────────────────────────────────────────────
 
-    function renderPacingStatus(campaignRows, totalsRow, preCampaign) {
+    function renderPacingStatus(campaignRows, totalsRow) {
       const today = new Date();
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
+      // Actual: D82 + E82 (+ M82 DSP) — authoritative cumulative totals
+      const { google: gActual, meta: mActual, dsp: dspActual, total: actualToDate } = getActualTotal(totalsRow, campaignRows);
+
+      // Planned: column P for the last row that has actual data
       const lastActualRow = getLastActualRow(campaignRows);
       const effectiveDate = lastActualRow ? lastActualRow.date : todayDate;
       const effectiveRows = campaignRows.filter(r => r.date && r.date <= effectiveDate);
       const effectiveDateRow = effectiveRows.length ? effectiveRows[effectiveRows.length - 1] : null;
-
       const budgetedToDate = effectiveDateRow ? effectiveDateRow.runningBudget : 0;
-      const { total: actualToDate } = getActualThroughDate(campaignRows, effectiveDate, preCampaign);
 
       const delta = actualToDate - budgetedToDate;
       const deltaPct = budgetedToDate ? (delta / budgetedToDate) * 100 : 0;
@@ -1010,12 +1010,10 @@
 
       const staleEl = $('pacingStaleNotice');
       const daysAgo = daysBetween(effectiveDate, todayDate);
-      const preSpend = preCampaign ? (preCampaign.googleCum || 0) + (preCampaign.metaCum || 0) : 0;
-      let noticeLines = [];
-      if (preSpend > 0) noticeLines.push(`Includes ${money(preSpend)} pre-campaign spend`);
-      if (lastActualRow && daysAgo > 0) noticeLines.push(`Data as of ${toMMDDYYYY(effectiveDate)} (${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago)`);
-      if (noticeLines.length) {
-        staleEl.textContent = noticeLines.join(' · ');
+      const lines = [];
+      if (lastActualRow && daysAgo > 0) lines.push(`Data as of ${toMMDDYYYY(effectiveDate)} (${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago)`);
+      if (lines.length) {
+        staleEl.textContent = lines.join(' · ');
         staleEl.classList.remove('hidden');
       } else {
         staleEl.classList.add('hidden');
@@ -1024,7 +1022,7 @@
 
     // ── Feature 2: Campaign Clock ─────────────────────────────────────────────
 
-    function renderCampaignClock(campaignRows, totalsRow, preCampaign) {
+    function renderCampaignClock(campaignRows, totalsRow) {
       const today = new Date();
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -1038,7 +1036,7 @@
       const elapsedPct  = totalDays ? (elapsedDays / totalDays) * 100 : 0;
 
       const totalBudgetN82 = totalsRow.dailyTotalBudget;
-      const { total: actualToDate } = getActualThroughDate(campaignRows, todayDate, preCampaign);
+      const { total: actualToDate } = getActualTotal(totalsRow, campaignRows);
       const budgetSpentPct = totalBudgetN82 ? (actualToDate / totalBudgetN82) * 100 : 0;
 
       $('clockDaysToPrimary').textContent  = daysToPrim;
@@ -1057,7 +1055,7 @@
 
     // ── Feature 3: Projected Final Spend ─────────────────────────────────────
 
-    function renderProjectedFinalSpend(campaignRows, totalsRow, preCampaign) {
+    function renderProjectedFinalSpend(campaignRows, totalsRow) {
       const today = new Date();
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -1067,7 +1065,7 @@
       const daysRemaining  = primaryDate ? Math.max(0, daysBetween(todayDate, primaryDate)) : 0;
       const burnRate       = get7DayBurnRate(campaignRows, lastActualDate);
 
-      const { dsp: paidDSP, total: actualToDate } = getActualThroughDate(campaignRows, todayDate, preCampaign);
+      const { dsp: paidDSP, total: actualToDate } = getActualTotal(totalsRow, campaignRows);
       const totalDSP  = campaignRows.reduce((s, r) => s + r.dspCommitment, 0);
       const unpaidDSP = Math.max(0, totalDSP - paidDSP);
 
@@ -1131,7 +1129,7 @@
 
     // ── Feature 5: Channel Budget Remaining ──────────────────────────────────
 
-    function renderChannelBudgetTable(campaignRows, totalsRow, preCampaign) {
+    function renderChannelBudgetTable(campaignRows, totalsRow) {
       const today = new Date();
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
@@ -1149,13 +1147,10 @@
       const metaAlloc          = metaReachAlloc + metaVoterAlloc;
       const dspAlloc           = totalsRow.dspCommitment;
 
-      const toDateRows = campaignRows.filter(r => r.date && r.date <= todayDate);
-      // Include pre-campaign baseline spend in totals
-      const preGoogle = preCampaign ? (preCampaign.googleCum || 0) : 0;
-      const preMeta   = preCampaign ? (preCampaign.metaCum  || 0) : 0;
-      const googleTotalSpent = toDateRows.reduce((s, r) => s + r.googleDaily, 0) + preGoogle;
-      const metaTotalSpent   = toDateRows.reduce((s, r) => s + r.metaDaily,  0) + preMeta;
-      const dspSpent         = computePaidDSP(campaignRows, todayDate);
+      // D82 and E82 are authoritative — use totalsRow directly
+      const googleTotalSpent = totalsRow.googleCum || 0;
+      const metaTotalSpent   = totalsRow.metaCum   || 0;
+      const dspSpent         = totalsRow.dspTotalSpend || computePaidDSP(campaignRows, todayDate);
 
       const gDispSpent  = googleAlloc > 0 ? googleTotalSpent * (googleDisplayAlloc / googleAlloc) : 0;
       const gSrchSpent  = googleAlloc > 0 ? googleTotalSpent * (googleSearchAlloc  / googleAlloc) : 0;
@@ -1460,11 +1455,11 @@
       _lastRenderData = data;
       const { campaignRows, totalsRow, preCampaign } = data;
       if (!totalsRow || !campaignRows) return;
-      renderPacingStatus(campaignRows, totalsRow, preCampaign);
-      renderCampaignClock(campaignRows, totalsRow, preCampaign);
-      renderProjectedFinalSpend(campaignRows, totalsRow, preCampaign);
+      renderPacingStatus(campaignRows, totalsRow);
+      renderCampaignClock(campaignRows, totalsRow);
+      renderProjectedFinalSpend(campaignRows, totalsRow);
       renderDataFreshness(campaignRows, preCampaign);
-      renderChannelBudgetTable(campaignRows, totalsRow, preCampaign);
+      renderChannelBudgetTable(campaignRows, totalsRow);
       renderCumulativeVsPlanChart(campaignRows, totalsRow);
       renderWeeklyBarChart(campaignRows, totalsRow);
       renderDSPTracker(campaignRows, totalsRow);
