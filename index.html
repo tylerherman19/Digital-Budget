@@ -701,15 +701,19 @@
       }, 0);
     }
 
-    function buildBurnSeriesFromCumulative(campaignRows, totalBudget) {
+    function buildBurnSeriesFromCumulative(campaignRows, totalBudget, preCampaign) {
       const totalCampaignDays = daysBetween(CAMPAIGN_START, PRIMARY_DATE) + 1;
       if (totalCampaignDays <= 0) return [];
+
+      const preCampaignBase = preCampaign
+        ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0))
+        : 0;
 
       const cumulativeByDate = campaignRows
         .filter((r) => r.date)
         .map((r) => ({
           date: r.date,
-          cumulativeActual: r.googleCum + r.metaCum + r.dspTotalSpend,
+          cumulativeActual: Math.max(0, r.googleCum + r.metaCum - preCampaignBase) + r.dspTotalSpend,
           runningBudget: r.runningBudget
         }))
         .sort((a, b) => a.date - b.date);
@@ -891,7 +895,7 @@
       $('lifetimeDSP').textContent = money(lifetimeDSP);
       $('lifetimeTotal').textContent = money(lifetimeTotal);
 
-      const burnSeries = buildBurnSeriesFromCumulative(campaignRows, totalBudget);
+      const burnSeries = buildBurnSeriesFromCumulative(campaignRows, totalBudget, preCampaign);
 
       renderStackedWeeklyChart(weeklySeries);
       renderLineChart('cumulativeBurnChart', burnSeries);
@@ -1186,12 +1190,16 @@
 
     // ── Feature 6: Cumulative Spend vs Plan Chart ─────────────────────────────
 
-    function renderCumulativeVsPlanChart(campaignRows, totalsRow) {
+    function renderCumulativeVsPlanChart(campaignRows, totalsRow, preCampaign) {
       const host = $('cumulativePlanChart');
       host.innerHTML = '';
 
       const dated = campaignRows.filter(r => r.date).sort((a, b) => a.date - b.date);
       if (!dated.length) { host.textContent = 'No campaign data available.'; return; }
+
+      const preCampaignBase = preCampaign
+        ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0))
+        : 0;
 
       const n = dated.length;
       const lastActualRow  = getLastActualRow(campaignRows);
@@ -1201,12 +1209,12 @@
       // Build planned and actual arrays
       const planned = dated.map(r => r.runningBudget);
 
-      // Actual: step function (carry forward last known googleCum + metaCum)
+      // Actual: step function (carry forward last known campaign-only spend)
       const actual = [];
       let lastKnown = 0;
       dated.forEach(r => {
         if (lastActualDate && r.date <= lastActualDate) {
-          if (r.googleCum + r.metaCum > 0) lastKnown = r.googleCum + r.metaCum;
+          if (r.googleCum + r.metaCum > 0) lastKnown = Math.max(0, r.googleCum + r.metaCum - preCampaignBase);
           actual.push(lastKnown);
         } else {
           actual.push(null);
@@ -1300,7 +1308,7 @@
 
     // ── Feature 7: Weekly Spend Bar Chart ─────────────────────────────────────
 
-    function renderWeeklyBarChart(campaignRows, totalsRow) {
+    function renderWeeklyBarChart(campaignRows, totalsRow, preCampaign) {
       const host = $('weeklyBarChart');
       host.innerHTML = '';
       if (!campaignRows.length) { host.textContent = 'No data.'; return; }
@@ -1348,6 +1356,13 @@
 
         return { label, actualSpend, plannedSpend, isFuture, barColor };
       }).filter(Boolean);
+
+      const preCampaignSpend = preCampaign
+        ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0))
+        : 0;
+      if (preCampaignSpend > 0) {
+        weeks.unshift({ label: 'Pre-Campaign', actualSpend: preCampaignSpend, plannedSpend: 0, isFuture: false, barColor: 'var(--dsp)' });
+      }
 
       if (!weeks.length) { host.textContent = 'No weekly data.'; return; }
 
@@ -1459,8 +1474,8 @@
       renderProjectedFinalSpend(campaignRows, totalsRow);
       renderDataFreshness(campaignRows, preCampaign);
       renderChannelBudgetTable(campaignRows, totalsRow);
-      renderCumulativeVsPlanChart(campaignRows, totalsRow);
-      renderWeeklyBarChart(campaignRows, totalsRow);
+      renderCumulativeVsPlanChart(campaignRows, totalsRow, preCampaign);
+      renderWeeklyBarChart(campaignRows, totalsRow, preCampaign);
       renderDSPTracker(campaignRows, totalsRow);
     }
 
