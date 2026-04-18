@@ -8,20 +8,49 @@
   <script src="https://apis.google.com/js/api.js" async defer></script>
   <style>
     :root {
-      --bg: #f2f1ed;
-      --card: #e6e3dd;
-      --muted: #6b6b6b;
-      --text: #111111;
-      --good: #2f6b2f;
-      --warn: #f59e0b;
-      --bad: #ef4444;
-      --border: #d2d0ca;
-      --accent: #3b84cf;
-      --bar: #c6c6c6;
-      --meta: #6366f1;
-      --google: #3b84cf;
-      --dsp: #f97316;
-      --planned: #374151;
+      /* Surface */
+      --bg: #f4f2ec;
+      --surface: #ffffff;
+      --surface-2: #f4f3ef;
+      --ink: #0c0c0d;
+      --ink-2: #3a3a3d;
+      --muted: #6e6e73;
+      --border: #e4e2dc;
+      --border-2: #d2d0ca;
+
+      /* Semantic state (the only saturated colors in the system) */
+      --good: #0f7a3b;   --good-bg: #e6f4ec;
+      --warn: #b45309;   --warn-bg: #fcf1dd;
+      --bad:  #b42318;   --bad-bg:  #fde7e4;
+      --info: #1d4ed8;   --info-bg: #e6edfb;
+
+      /* Channel (desaturated — never used to signal state) */
+      --google:  #5b7a9a;
+      --meta:    #7b7cb8;
+      --dsp:     #c08054;
+      --planned: #8a8a8f;
+
+      /* Legacy aliases — kept until Insights + Pacing tabs are redesigned */
+      --text: var(--ink);
+      --card: var(--surface);
+      --accent: var(--ink-2);
+      --bar: var(--surface-2);
+
+      /* Type scale */
+      --fs-hero:  4rem;
+      --fs-kpi:   2.25rem;
+      --fs-h2:    1.25rem;
+      --fs-body:  0.95rem;
+      --fs-label: 0.72rem;
+      --ls-label: 0.08em;
+
+      /* Spacing scale (4px base) */
+      --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+      --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+
+      --radius:    12px;
+      --radius-lg: 18px;
+      --shadow-card: 0 1px 2px rgba(12,12,13,0.04), 0 1px 0 rgba(12,12,13,0.02);
     }
     * { box-sizing: border-box; }
     body {
@@ -226,6 +255,281 @@
       border-radius: 10px;
       padding: 10px;
     }
+
+    /* ═══ Redesign: hero, alerts, kpi, channel strip, weekly ═════════════ */
+    body { font-feature-settings: "tnum", "ss01"; }
+
+    .section-label {
+      font-size: var(--fs-label);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--muted);
+      font-weight: 700;
+      margin: 24px 0 10px;
+    }
+
+    /* Hero pacing card */
+    .hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 6px solid var(--muted);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+    .hero[data-state="good"]    { border-left-color: var(--good); background: linear-gradient(90deg, var(--good-bg), var(--surface) 55%); }
+    .hero[data-state="warn"]    { border-left-color: var(--warn); background: linear-gradient(90deg, var(--warn-bg), var(--surface) 55%); }
+    .hero[data-state="bad"]     { border-left-color: var(--bad);  background: linear-gradient(90deg, var(--bad-bg),  var(--surface) 55%); }
+    .hero[data-state="neutral"] { border-left-color: var(--info); background: linear-gradient(90deg, var(--info-bg), var(--surface) 55%); }
+
+    .hero__eyebrow {
+      font-size: var(--fs-label);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .hero__eyebrow .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      display: inline-block; background: var(--muted);
+    }
+    .hero[data-state="good"] .hero__eyebrow .dot { background: var(--good); }
+    .hero[data-state="warn"] .hero__eyebrow .dot { background: var(--warn); }
+    .hero[data-state="bad"]  .hero__eyebrow .dot { background: var(--bad);  }
+    .hero[data-state="neutral"] .hero__eyebrow .dot { background: var(--info); }
+
+    .hero__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .hero__primary { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+    .hero__number {
+      font-size: var(--fs-hero);
+      font-weight: 800;
+      line-height: 0.95;
+      color: var(--ink);
+      letter-spacing: -0.025em;
+      font-variant-numeric: tabular-nums;
+    }
+    .hero__unit {
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .hero__secondary { text-align: right; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .hero__verdict {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .hero__urgency {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--bad);
+      color: #fff;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .hero__subline {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--ink-2);
+      font-size: 0.92rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.55;
+    }
+    .hero__subline .sep { color: var(--border-2); margin: 0 8px; }
+
+    /* Alerts */
+    .alerts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .alerts:empty { display: none; }
+    .alert {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      border: 1px solid;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .alert--warn { background: var(--warn-bg); border-color: rgba(180,83,9,0.25);  color: #78350f; }
+    .alert--bad  { background: var(--bad-bg);  border-color: rgba(180,35,24,0.25); color: #7f1d1d; }
+    .alert--info { background: var(--info-bg); border-color: rgba(29,78,216,0.25); color: #1e3a8a; }
+    .alert__icon { font-size: 1.1rem; line-height: 1.3; flex-shrink: 0; }
+    .alert__title { font-weight: 700; margin-bottom: 2px; }
+    .alert__text { color: inherit; opacity: 0.92; font-variant-numeric: tabular-nums; }
+
+    /* KPI row */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+    }
+    .kpi__label {
+      font-size: var(--fs-label);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .kpi__number {
+      font-size: var(--fs-kpi);
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.015em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.05;
+      margin-bottom: 8px;
+    }
+    .kpi__meta {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* Delta chip */
+    .delta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .delta-chip--good    { background: var(--good-bg); color: var(--good); }
+    .delta-chip--warn    { background: var(--warn-bg); color: var(--warn); }
+    .delta-chip--bad     { background: var(--bad-bg);  color: var(--bad); }
+    .delta-chip--neutral { background: var(--surface-2); color: var(--ink-2); }
+
+    /* Channel strip */
+    .channel-strip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .channel-row {
+      display: grid;
+      grid-template-columns: minmax(180px, 1.1fr) minmax(200px, 2fr) minmax(180px, 1fr);
+      gap: 20px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .channel-row:last-child { border-bottom: none; }
+    .channel-row__name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--ink);
+    }
+    .channel-row__sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+    .channel-row__track {
+      position: relative;
+      height: 10px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .channel-row__fill {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      border-radius: inherit;
+      transition: width 0.3s ease;
+    }
+    .channel-row__fill--google { background: var(--google); }
+    .channel-row__fill--meta   { background: var(--meta); }
+    .channel-row__fill--dsp    { background: var(--dsp); }
+    .channel-row__fill--over   { background: var(--bad); }
+    .channel-row__right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+    .channel-row__pct {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--ink);
+    }
+    .channel-row__pct .muted-inline { color: var(--muted); font-weight: 500; font-size: 0.82rem; margin-left: 6px; }
+
+    /* Weekly table card */
+    .weekly-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .weekly-card table { width: 100%; border-collapse: collapse; }
+    .weekly-card th {
+      font-size: var(--fs-label);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--muted);
+      font-weight: 700;
+      padding: 12px 16px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .weekly-card th:first-child, .weekly-card td:first-child { text-align: left; }
+    .weekly-card td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+      color: var(--ink-2);
+    }
+    .weekly-card tr:nth-child(even) td { background: var(--surface-2); }
+    .weekly-card tr:last-child td { border-bottom: none; }
+    .weekly-card tr.is-current td { background: var(--info-bg); color: var(--ink); font-weight: 600; }
+    .weekly-card tr.is-pre td { color: var(--muted); font-style: italic; }
+    .weekly-card tr td.total-cell { font-weight: 700; color: var(--ink); }
   </style>
 </head>
 <body>
@@ -242,6 +546,21 @@
     </div>
 
     <div id="dashboard" class="hidden">
+      <section id="heroPacing" class="hero" data-state="neutral">
+        <div class="hero__eyebrow"><span class="dot"></span>Loading…</div>
+        <div class="hero__row">
+          <div class="hero__primary">
+            <div class="hero__number">—</div>
+            <div class="hero__unit">days until election day</div>
+          </div>
+          <div class="hero__secondary">
+            <div class="hero__verdict">—</div>
+          </div>
+        </div>
+        <div class="hero__subline">Fetching data…</div>
+      </section>
+      <div id="alertsBar" class="alerts"></div>
+
       <div class="tabbar">
         <button id="summaryTabBtn" class="tab-btn active">Summary</button>
         <button id="insightsTabBtn" class="tab-btn">Insights & Charts</button>
@@ -249,75 +568,41 @@
       </div>
 
       <div id="summaryTab" class="tab-panel">
-        <div class="grid">
-          <section class="card">
-            <h2>Total budget</h2>
-            <div id="totalBudgetCard" class="stat">$0</div>
-            <div class="kvs">
-              <span class="muted">Full campaign</span><span id="campaignLabel">Budget plan</span>
-            </div>
-          </section>
-
-          <section class="card">
-            <h2>Total spent</h2>
-            <div id="actualToDate" class="stat">$0</div>
-            <div class="kvs">
-              <span class="muted">Budget used</span><span id="pacingDeltaPct">0%</span>
-            </div>
-          </section>
-
-          <section class="card">
-            <h2>This week</h2>
-            <div id="thisWeekCard" class="stat">$0</div>
-            <div class="kvs">
-              <span class="muted">Current week burn (R)</span><span id="thisWeekMeta">-</span>
-            </div>
-          </section>
-
-          <section class="card">
-            <h2>Remaining</h2>
-            <div id="remainingCard" class="stat">$0</div>
-            <div class="kvs">
-              <span class="muted">~Daily pace to primary</span><span id="paceDaily">$0/day</span>
-            </div>
-          </section>
+        <!-- KPI row -->
+        <div class="kpi-row">
+          <div class="kpi">
+            <div class="kpi__label">Total budget</div>
+            <div id="totalBudgetCard" class="kpi__number">$0</div>
+            <div class="kpi__meta">Full campaign plan</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Spent to date</div>
+            <div id="actualToDate" class="kpi__number">$0</div>
+            <div class="kpi__meta" id="spentMetaRow">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">This week</div>
+            <div id="thisWeekCard" class="kpi__number">$0</div>
+            <div class="kpi__meta" id="thisWeekMeta">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Remaining</div>
+            <div id="remainingCard" class="kpi__number">$0</div>
+            <div class="kpi__meta" id="paceDaily">—</div>
+          </div>
         </div>
 
-        <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:2rem;">Overall burn rate</h2>
-          <div class="kvs" style="margin-bottom:10px;">
-            <span class="muted">Expected</span><span id="expectedBurn">0%</span>
-            <span class="muted">Actual</span><span id="actualBurn">0%</span>
-          </div>
-          <div class="bar"><span id="overallBurnBar" style="width:0%"></span></div>
-          <div class="kvs" style="margin-top:8px;">
-            <span class="muted" id="firstDayLabel">-</span><span id="todayLabel">-</span>
-            <span class="muted">Primary</span><span id="primaryDate">-</span>
-          </div>
-        </section>
+        <!-- Channel performance -->
+        <div class="section-label">Channel performance</div>
+        <div id="channelStrip" class="channel-strip"></div>
 
-        <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:2rem;">Channel breakdown</h2>
+        <!-- Weekly spend -->
+        <div class="section-label">Weekly spend</div>
+        <div class="weekly-card">
           <table>
             <thead>
               <tr>
-                <th>Channel</th>
-                <th>Allocated</th>
-                <th>Spent</th>
-                <th>Remaining</th>
-                <th>% Used</th>
-              </tr>
-            </thead>
-            <tbody id="channelBody"></tbody>
-          </table>
-        </section>
-
-        <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:2rem;">Weekly spend (Sheet column A labels)</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Week / label</th>
+                <th>Week</th>
                 <th>Google</th>
                 <th>Meta</th>
                 <th>DSPolitical</th>
@@ -326,18 +611,7 @@
             </thead>
             <tbody id="weeklyBody"></tbody>
           </table>
-        </section>
-
-        <section class="card" style="margin-top:12px;">
-          <h2>Before the main digital</h2>
-          <div class="kvs">
-            <span class="muted">Label</span><span id="preDate">Before the main digital</span>
-            <span class="muted">Google cumulative at row 2</span><span id="preGoogle">$0</span>
-            <span class="muted">Meta cumulative at row 2</span><span id="preMeta">$0</span>
-            <span class="muted">DSPolitical commitments row 2</span><span id="preDSP">$0</span>
-            <span class="muted">Before-campaign spend total</span><span id="preTotal">$0</span>
-          </div>
-        </section>
+        </div>
       </div>
 
       <div id="insightsTab" class="tab-panel hidden">
@@ -494,6 +768,8 @@
     const CAMPAIGN_START = new Date('2026-05-26T00:00:00');
     const PRIMARY_DATE = new Date('2026-08-11T00:00:00');
     const PRE_CAMPAIGN_BUDGET = 1500;
+
+    const THRESHOLDS = { staleDays: 2, warnPct: 10, badPct: 25, atRiskLead: 15, urgencyDays: 30 };
 
     let tokenClient;
     let accessToken = null;
@@ -738,6 +1014,234 @@
       });
     }
 
+    // ── computePacing: single source of truth for hero + alerts ──────────────
+
+    function computePacing(data) {
+      const { preCampaign, campaignRows, totalsRow } = data;
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const datedRows = campaignRows.filter(r => r.date).sort((a, b) => a.date - b.date);
+      const firstDay   = datedRows.length ? datedRows[0].date : null;
+      const primary    = datedRows.length ? datedRows[datedRows.length - 1].date : null;
+
+      const totalDays    = (firstDay && primary) ? daysBetween(firstDay, primary) + 1 : 0;
+      const daysToPrimary = primary ? Math.max(0, daysBetween(todayDate, primary)) : 0;
+      const elapsedDays   = firstDay ? Math.min(totalDays, Math.max(0, daysBetween(firstDay, todayDate) + 1)) : 0;
+      const elapsedPct    = totalDays ? (elapsedDays / totalDays) * 100 : 0;
+
+      const isPreCampaign = todayDate < CAMPAIGN_START;
+      const daysToStart   = Math.max(0, daysBetween(todayDate, CAMPAIGN_START));
+
+      const { google, meta, dsp, total: actualToDate } = getActualTotal(totalsRow, campaignRows);
+
+      const lastActualRow   = getLastActualRow(campaignRows);
+      const lastActualDate  = lastActualRow ? lastActualRow.date : null;
+      const effectiveRows   = campaignRows.filter(r => r.date && r.date <= (lastActualDate || todayDate));
+      const effectiveDateRow = effectiveRows.length ? effectiveRows[effectiveRows.length - 1] : null;
+      const budgetedToDate  = (effectiveDateRow ? effectiveDateRow.runningBudget : 0) + PRE_CAMPAIGN_BUDGET;
+
+      const deltaDollar = actualToDate - budgetedToDate;
+      const deltaPct    = budgetedToDate ? (deltaDollar / budgetedToDate) * 100 : 0;
+      const absPct      = Math.abs(deltaPct);
+
+      const totalBudget = totalsRow ? (totalsRow.dailyTotalBudget || totalsRow.weeklyBurn || 0) : 0;
+      const burnRate    = get7DayBurnRate(campaignRows, lastActualDate);
+      const totalDSP    = campaignRows.reduce((s, r) => s + r.dspCommitment, 0);
+      const unpaidDSP   = Math.max(0, totalDSP - dsp);
+      const projectedFinal       = actualToDate + burnRate * daysToPrimary + unpaidDSP;
+      const projectedVariance    = projectedFinal - totalBudget;
+      const projectedVariancePct = totalBudget ? (projectedVariance / totalBudget) * 100 : 0;
+
+      const daysSinceLastEntry = (lastActualDate) ? daysBetween(lastActualDate, todayDate) : null;
+
+      let state, verdict;
+      if (isPreCampaign) {
+        state = 'neutral'; verdict = 'Pre-campaign window';
+      } else if (deltaDollar > 0 && absPct > THRESHOLDS.warnPct) {
+        state = 'bad';  verdict = 'Overspending';
+      } else if (absPct > THRESHOLDS.badPct) {
+        state = 'bad';  verdict = 'Behind plan';
+      } else if (absPct > THRESHOLDS.warnPct) {
+        state = 'warn'; verdict = deltaDollar < 0 ? 'Under pace' : 'Running hot';
+      } else {
+        state = 'good'; verdict = 'On track';
+      }
+
+      return {
+        todayDate, firstDay, primary, isPreCampaign, daysToStart,
+        totalDays, daysToPrimary, elapsedDays, elapsedPct,
+        actualToDate, budgetedToDate, totalBudget,
+        google, meta, dsp, unpaidDSP,
+        deltaDollar, deltaPct, absPct,
+        burnRate, projectedFinal, projectedVariance, projectedVariancePct,
+        state, verdict,
+        daysSinceLastEntry, lastActualDate
+      };
+    }
+
+    // ── renderHero ────────────────────────────────────────────────────────────
+
+    function renderHero(p) {
+      const host = $('heroPacing');
+      host.dataset.state = p.state;
+
+      const domNum   = p.isPreCampaign ? p.daysToStart : p.daysToPrimary;
+      const domUnit  = p.isPreCampaign
+        ? (p.daysToStart === 1 ? 'day until campaign launch' : 'days until campaign launch')
+        : (p.daysToPrimary === 1 ? 'day until election day' : 'days until election day');
+
+      const urgencyHtml = (!p.isPreCampaign && p.daysToPrimary < THRESHOLDS.urgencyDays)
+        ? '<span class="hero__urgency">Final stretch</span>' : '';
+
+      let deltaHtml;
+      if (p.isPreCampaign) {
+        const prePct = p.totalBudget ? ((p.actualToDate / p.totalBudget) * 100).toFixed(1) : '0.0';
+        deltaHtml = `<span class="delta-chip delta-chip--neutral">${prePct}% of total budget used</span>`;
+      } else {
+        const sign   = p.deltaDollar >= 0 ? '+' : '−';
+        const cls    = p.deltaDollar >= 0 ? 'bad' : (p.absPct > THRESHOLDS.badPct ? 'bad' : p.absPct > THRESHOLDS.warnPct ? 'warn' : 'good');
+        const label  = p.deltaDollar >= 0 ? 'over plan' : 'under plan';
+        deltaHtml = `<span class="delta-chip delta-chip--${cls}">${sign}${money(Math.abs(p.deltaDollar))} · ${p.absPct.toFixed(1)}% ${label}</span>`;
+      }
+
+      let subline;
+      if (p.isPreCampaign) {
+        subline = `Pre-campaign spend: <strong>${money(p.actualToDate)}</strong> of ${money(p.totalBudget)} total budget`
+          + (p.lastActualDate ? ` <span class="sep">·</span> Last entry ${toMMDDYYYY(p.lastActualDate)}` : '')
+          + ` <span class="sep">·</span> Campaign launches ${toMMDDYYYY(CAMPAIGN_START)}`;
+      } else {
+        subline = `Spent <strong>${money(p.actualToDate)}</strong> of ${money(p.totalBudget)}`
+          + ` <span class="sep">·</span> ${p.elapsedDays} of ${p.totalDays} days elapsed (${p.elapsedPct.toFixed(0)}%)`
+          + ` <span class="sep">·</span> Projected final <strong>${money(p.projectedFinal)}</strong>`;
+      }
+
+      host.innerHTML = `
+        <div class="hero__eyebrow">
+          <span class="dot"></span>
+          Election ${toMMDDYYYY(PRIMARY_DATE)}
+          <span style="color:var(--border-2)">·</span>
+          ${p.verdict}${urgencyHtml}
+        </div>
+        <div class="hero__row">
+          <div class="hero__primary">
+            <div class="hero__number">${domNum}</div>
+            <div class="hero__unit">${domUnit}</div>
+          </div>
+          <div class="hero__secondary">
+            <div class="hero__verdict">${p.verdict}${urgencyHtml}</div>
+            <div>${deltaHtml}</div>
+          </div>
+        </div>
+        <div class="hero__subline">${subline}</div>`;
+    }
+
+    // ── renderAlerts ──────────────────────────────────────────────────────────
+
+    function renderAlerts(p) {
+      const host = $('alertsBar');
+      host.innerHTML = '';
+
+      const push = (state, title, body) => {
+        const d = document.createElement('div');
+        d.className = `alert alert--${state}`;
+        d.innerHTML = `<div class="alert__icon">${state === 'bad' ? '⚠' : '⚠'}</div>`
+          + `<div class="alert__body"><div class="alert__title">${title}</div><div class="alert__text">${body}</div></div>`;
+        host.appendChild(d);
+      };
+
+      if (p.daysSinceLastEntry !== null && p.daysSinceLastEntry > THRESHOLDS.staleDays) {
+        push('warn', 'Data may be stale',
+          `Last campaign entry was ${p.daysSinceLastEntry} day${p.daysSinceLastEntry !== 1 ? 's' : ''} ago (${toMMDDYYYY(p.lastActualDate)}). Update the sheet for accurate pacing.`);
+      }
+
+      if (!p.isPreCampaign && p.projectedVariance > 0 && p.projectedVariancePct > 5) {
+        push('bad', 'Projected to overspend',
+          `At current burn rate, projected final is ${money(p.projectedFinal)} — ${money(p.projectedVariance)} (${p.projectedVariancePct.toFixed(1)}%) over budget.`);
+      }
+
+      if (!p.isPreCampaign && p.actualToDate === 0) {
+        push('info', 'No campaign spend recorded',
+          'No campaign-period actuals have been entered in the sheet yet.');
+      }
+    }
+
+    // ── renderChannelStrip ────────────────────────────────────────────────────
+
+    function renderChannelStrip(data, pacing) {
+      const { campaignRows, totalsRow } = data;
+      const host = $('channelStrip');
+      if (!host || !totalsRow) return;
+
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const lastActualRow  = getLastActualRow(campaignRows);
+      const lastActualDate = lastActualRow ? lastActualRow.date : null;
+      const primaryDate    = getPrimaryDateDynamic(campaignRows);
+      const daysRemaining  = primaryDate ? Math.max(0, daysBetween(todayDate, primaryDate)) : 0;
+      const burnRate7      = get7DayBurnRate(campaignRows, lastActualDate);
+
+      const googleAlloc  = totalsRow.googleDisplayBudget + totalsRow.googleSearchBudget;
+      const metaAlloc    = totalsRow.metaVoterFile + totalsRow.metaBoosted;
+      const dspAlloc     = totalsRow.dspCommitment;
+      const googleSpent  = totalsRow.googleCum || 0;
+      const metaSpent    = totalsRow.metaCum || 0;
+      const dspSpent     = totalsRow.dspTotalSpend || computePaidDSP(campaignRows, todayDate);
+
+      const totalGMAlloc = googleAlloc + metaAlloc;
+      const googleBurn   = totalGMAlloc > 0 ? burnRate7 * (googleAlloc / totalGMAlloc) : 0;
+      const metaBurn     = totalGMAlloc > 0 ? burnRate7 * (metaAlloc   / totalGMAlloc) : 0;
+      const googleProj   = googleSpent + googleBurn * daysRemaining;
+      const metaProj     = metaSpent   + metaBurn   * daysRemaining;
+
+      const channels = [
+        { name: 'Google',      key: 'google', alloc: googleAlloc, spent: googleSpent, proj: googleProj },
+        { name: 'Meta',        key: 'meta',   alloc: metaAlloc,   spent: metaSpent,   proj: metaProj   },
+        { name: 'DSPolitical', key: 'dsp',    alloc: dspAlloc,    spent: dspSpent,    proj: dspAlloc   }
+      ];
+
+      host.innerHTML = '';
+      channels.forEach(ch => {
+        const usedPct   = ch.alloc ? Math.min(100, (ch.spent / ch.alloc) * 100) : 0;
+        const remaining = Math.max(0, ch.alloc - ch.spent);
+        const isOver    = ch.proj > ch.alloc;
+        const isDepleted = remaining <= 0;
+
+        let badgeCls, badgeText;
+        if (isDepleted)      { badgeCls = 'badge-bad';  badgeText = 'Exhausted'; }
+        else if (isOver)     { badgeCls = 'badge-warn'; badgeText = 'At risk'; }
+        else                 { badgeCls = 'badge-good'; badgeText = 'On track'; }
+
+        const fillCls = isDepleted || isOver ? 'channel-row__fill--over' : `channel-row__fill--${ch.key}`;
+
+        const div = document.createElement('div');
+        div.className = 'channel-row';
+        div.innerHTML = `
+          <div>
+            <div class="channel-row__name">${ch.name}</div>
+            <div class="channel-row__sub">${money(ch.spent)} spent · ${money(remaining)} left</div>
+          </div>
+          <div>
+            <div class="channel-row__track">
+              <div class="channel-row__fill ${fillCls}" style="width:${usedPct.toFixed(1)}%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:0.78rem;color:var(--muted);font-variant-numeric:tabular-nums;">
+              <span>${money(0)}</span>
+              <span>Proj. ${money(ch.proj)}</span>
+              <span>${money(ch.alloc)}</span>
+            </div>
+          </div>
+          <div class="channel-row__right">
+            <div class="channel-row__pct">${usedPct.toFixed(0)}%<span class="muted-inline">of ${money(ch.alloc)}</span></div>
+            <span class="status-badge ${badgeCls}">${badgeText}</span>
+          </div>`;
+        host.appendChild(div);
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+
     function render(data) {
       const { preCampaign, campaignRows, totalsRow } = data;
       if (!totalsRow) return showError('Totals row (82) not found in fetched range.');
@@ -745,179 +1249,116 @@
       const today = new Date();
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
+      // ── Shared pacing computation ──
+      const pacing = computePacing(data);
+      renderHero(pacing);
+      renderAlerts(pacing);
+      renderChannelStrip(data, pacing);
+
+      // ── KPI row ──
+      const { actualToDate, totalBudget, deltaDollar, absPct, state } = pacing;
       const datedRows = campaignRows.filter(r => r.date);
-      const primary = datedRows.length ? datedRows[datedRows.length - 1].date : null;
-      const firstDay = datedRows.length ? datedRows[0].date : null;
-
-      const toDateRows = datedRows.filter(r => r.date <= todayDate);
-      const plannedToDate = toDateRows.length ? toDateRows[toDateRows.length - 1].runningBudget : 0;
-      const googleMetaActualToDate = toDateRows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
-      const paidDSPToDate = computePaidDSP(campaignRows, todayDate);
-      const totalsRowActualToDate = totalsRow.googleCum + totalsRow.metaCum + totalsRow.dspTotalSpend;
-      const actualToDate = totalsRowActualToDate || (googleMetaActualToDate + paidDSPToDate);
-
-      const paceDelta = actualToDate - plannedToDate;
-      const paceDeltaPct = plannedToDate ? (paceDelta / plannedToDate) * 100 : 0;
-      const absPct = Math.abs(paceDeltaPct);
-      const paceClass = absPct > 25 ? 'bad' : absPct > 10 ? 'warn' : 'good';
-      const totalBudget = totalsRow.weeklyBurn;
+      const primary   = datedRows.length ? datedRows[datedRows.length - 1].date : null;
+      const firstDay  = datedRows.length ? datedRows[0].date : null;
+      const totalDays    = (firstDay && primary) ? daysBetween(firstDay, primary) + 1 : 0;
+      const daysToPrimary = primary ? Math.max(0, daysBetween(todayDate, primary)) : 0;
+      const remaining    = Math.max(0, totalBudget - actualToDate);
+      const paceDaily    = daysToPrimary > 0 ? remaining / daysToPrimary : remaining;
       const budgetSpentPct = totalBudget ? (actualToDate / totalBudget) * 100 : 0;
 
       $('totalBudgetCard').textContent = money(totalBudget);
-      $('campaignLabel').textContent = 'Full campaign';
-      $('actualToDate').textContent = money(actualToDate);
-      $('actualToDate').className = `stat ${paceClass}`;
-      $('pacingDeltaPct').textContent = `${pct(budgetSpentPct)} used`;
+      $('actualToDate').textContent    = money(actualToDate);
+      $('actualToDate').className      = 'kpi__number';
 
-      const totalDays = (firstDay && primary) ? daysBetween(firstDay, primary) + 1 : 0;
-      const elapsedDays = firstDay ? Math.min(totalDays, Math.max(0, daysBetween(firstDay, todayDate) + 1)) : 0;
-      const daysToPrimary = primary ? Math.max(0, daysBetween(todayDate, primary)) : 0;
-      const elapsedPct = totalDays ? (elapsedDays / totalDays) * 100 : 0;
+      const deltaSign  = deltaDollar >= 0 ? '+' : '−';
+      const deltaCls   = deltaDollar > 0 ? 'bad' : (absPct > THRESHOLDS.badPct ? 'bad' : absPct > THRESHOLDS.warnPct ? 'warn' : 'good');
+      const deltaLabel = deltaDollar >= 0 ? 'over' : 'under';
+      $('spentMetaRow').innerHTML = `${pct(budgetSpentPct)} used`
+        + ` <span class="delta-chip delta-chip--${deltaCls}">${deltaSign}${money(Math.abs(deltaDollar))} ${deltaLabel}</span>`;
 
-      let thisWeek, thisWeekBudget;
+      let thisWeek = 0, thisWeekBudget = 0;
       if (todayDate < CAMPAIGN_START) {
-        thisWeek = (preCampaign?.googleCum || 0) + (preCampaign?.metaCum || 0);
+        thisWeek       = (preCampaign?.googleCum || 0) + (preCampaign?.metaCum || 0);
         thisWeekBudget = PRE_CAMPAIGN_BUDGET;
       } else {
-        const _weekStarts = [2, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
+        const _weekStarts  = [2, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
         const _campaignEnd = 80;
-        let _weekActual = 0, _weekBudget = 0;
         for (let wi = 0; wi < _weekStarts.length; wi++) {
           const _s = Math.max(_weekStarts[wi], 3);
           const _e = Math.min(_weekStarts[wi + 1] ? _weekStarts[wi + 1] - 1 : _campaignEnd, _campaignEnd);
           const _rows = campaignRows.filter(r => r.sheetRow >= _s && r.sheetRow <= _e && r.date);
           if (!_rows.length) continue;
-          const _first = _rows[0].date, _last = _rows[_rows.length - 1].date;
-          if (todayDate >= _first && todayDate <= _last) {
-            _weekActual = _rows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
+          if (todayDate >= _rows[0].date && todayDate <= _rows[_rows.length - 1].date) {
+            thisWeek = _rows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
             const _lastRow = _rows[_rows.length - 1];
             const _prevRow = campaignRows.find(r => r.sheetRow === _s - 1);
-            _weekBudget = Math.max(0, _lastRow.runningBudget - (_prevRow?.runningBudget || 0));
+            thisWeekBudget = Math.max(0, _lastRow.runningBudget - (_prevRow?.runningBudget || 0));
             break;
           }
         }
-        thisWeek = _weekActual;
-        thisWeekBudget = _weekBudget || totalsRow.weeklyBurn;
+        thisWeekBudget = thisWeekBudget || totalsRow.weeklyBurn;
       }
-      const remaining = Math.max(0, totalBudget - actualToDate);
-      const paceDaily = daysToPrimary > 0 ? remaining / daysToPrimary : remaining;
 
       $('thisWeekCard').textContent = money(thisWeek);
-      $('thisWeekMeta').textContent = `of ${money(thisWeekBudget)} budget`;
+      $('thisWeekMeta').textContent = `of ${money(thisWeekBudget)} budgeted`;
       $('remainingCard').textContent = money(remaining);
-      $('paceDaily').textContent = `${money(paceDaily)}/day`;
+      $('paceDaily').textContent     = `${money(paceDaily)}/day needed`;
 
-      $('expectedBurn').textContent = pct(elapsedPct);
-      $('actualBurn').textContent = pct(budgetSpentPct);
-      $('overallBurnBar').style.width = `${Math.max(0, Math.min(100, budgetSpentPct))}%`;
-      $('firstDayLabel').textContent = toISO(firstDay);
-      $('todayLabel').textContent = `${toISO(todayDate)} (today)`;
-      $('primaryDate').textContent = toISO(primary);
-
-      const tbody = $('channelBody');
-      tbody.innerHTML = '';
-      const googleSpent = totalsRow.googleCum || (toDateRows.length ? toDateRows[toDateRows.length - 1].googleCum : 0);
-      const metaSpent = totalsRow.metaCum || (toDateRows.length ? toDateRows[toDateRows.length - 1].metaCum : 0);
-      const toDateDSP = totalsRow.dspTotalSpend || computePaidDSP(campaignRows, todayDate);
-      const googleAllocated = totalsRow.googleDisplayBudget + totalsRow.googleSearchBudget;
-      const metaAllocated = totalsRow.metaVoterFile + totalsRow.metaBoosted;
-
-      const channelRows = [
-        { name: 'Google ads (total)', allocated: googleAllocated, spent: googleSpent },
-        { name: 'Meta ads (including all)', allocated: metaAllocated, spent: metaSpent },
-        { name: 'DSPolitical/other', allocated: totalsRow.dspCommitment, spent: toDateDSP }
-      ];
-
-      channelRows.forEach(c => {
-        const allocated = c.allocated;
-        const spent = c.spent;
-        const remainingChannel = allocated - spent;
-        const used = allocated ? (spent / allocated) * 100 : 0;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${c.name}</td><td>${money(allocated)}</td><td>${money(spent)}</td><td>${money(remainingChannel)}</td><td>${pct(used)}</td>`;
-        tbody.appendChild(tr);
-      });
-
+      // ── Weekly table ──
       const weeklyBody = $('weeklyBody');
       weeklyBody.innerHTML = '';
 
       const weeklySeries = [];
       const weekStarts = [2, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
       const campaignStart = 3;
-      const campaignEnd = 80;
+      const campaignEnd   = 80;
+
       if (preCampaign) {
-        const preGoogle = preCampaign.googleCum || 0;
-        const preMeta = preCampaign.metaCum || 0;
-        const preDSP = preCampaign.dspCommitment || 0;
-        weeklySeries.push({
-          label: 'Before the main digital',
-          google: preGoogle,
-          meta: preMeta,
-          dsp: preDSP,
-          total: preGoogle + preMeta + preDSP
-        });
+        const preGoogle = preCampaign.googleCum  || 0;
+        const preMeta   = preCampaign.metaCum    || 0;
+        const preDSP    = preCampaign.dspCommitment || 0;
+        weeklySeries.push({ label: 'Pre-campaign', google: preGoogle, meta: preMeta, dsp: preDSP,
+          total: preGoogle + preMeta + preDSP, isPre: true });
       }
 
-      const weekRanges = weekStarts
-        .map((start, idx) => {
-          const nextStart = weekStarts[idx + 1];
-          return {
-            start: Math.max(start, campaignStart),
-            end: Math.min(nextStart ? nextStart - 1 : campaignEnd, campaignEnd)
-          };
-        })
-        .filter(({ start, end }) => start <= end);
-
-      weekRanges.forEach(({ start, end }) => {
+      weekStarts.map((start, idx) => ({
+        start: Math.max(start, campaignStart),
+        end: Math.min(weekStarts[idx + 1] ? weekStarts[idx + 1] - 1 : campaignEnd, campaignEnd)
+      })).filter(({ start, end }) => start <= end)
+      .forEach(({ start, end }) => {
         const bucketRows = campaignRows.filter(r => r.sheetRow >= start && r.sheetRow <= end);
         if (!bucketRows.length) return;
-
-        const google = bucketRows.reduce((sum, r) => sum + r.googleDaily, 0);
-        const meta = bucketRows.reduce((sum, r) => sum + r.metaDaily, 0);
-        const dsp = bucketRows.reduce((sum, r) => sum + (r.weeklyActual || 0), 0);
-        const firstRow = bucketRows[0];
-        const lastRow = bucketRows[bucketRows.length - 1];
-        const firstLabel = firstRow.label || (firstRow.date ? toISO(firstRow.date) : '');
-        const lastLabel = lastRow.label || (lastRow.date ? toISO(lastRow.date) : '');
-        const label = firstLabel && lastLabel
-          ? (firstLabel === lastLabel ? firstLabel : `${firstLabel}–${lastLabel}`)
-          : (firstLabel || lastLabel || `Week of row ${start}`);
-        const total = google + meta + dsp;
-
-        weeklySeries.push({
-          label,
-          google,
-          meta,
-          dsp,
-          total
-        });
+        const google = bucketRows.reduce((s, r) => s + r.googleDaily, 0);
+        const meta   = bucketRows.reduce((s, r) => s + r.metaDaily,   0);
+        const dsp    = bucketRows.reduce((s, r) => s + (r.weeklyActual || 0), 0);
+        const firstRow = bucketRows[0], lastRow = bucketRows[bucketRows.length - 1];
+        const fl = firstRow.label || (firstRow.date ? toISO(firstRow.date) : '');
+        const ll = lastRow.label  || (lastRow.date  ? toISO(lastRow.date)  : '');
+        const label = fl && ll ? (fl === ll ? fl : `${fl}–${ll}`) : (fl || ll || `Row ${start}`);
+        const isCurrent = firstRow.date && lastRow.date && todayDate >= firstRow.date && todayDate <= lastRow.date;
+        weeklySeries.push({ label, google, meta, dsp, total: google + meta + dsp, isCurrent });
       });
 
-      weeklySeries.forEach((w) => {
+      weeklySeries.forEach(w => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${w.label}</td><td>${money(w.google)}</td><td>${money(w.meta)}</td><td>${money(w.dsp)}</td><td>${money(w.total)}</td>`;
+        if (w.isPre)     tr.className = 'is-pre';
+        if (w.isCurrent) tr.className = 'is-current';
+        tr.innerHTML = `<td>${w.label}</td><td>${money(w.google)}</td><td>${money(w.meta)}</td>`
+          + `<td>${money(w.dsp)}</td><td class="total-cell">${money(w.total)}</td>`;
         weeklyBody.appendChild(tr);
       });
 
-      const preTotal = (preCampaign?.googleCum || 0) + (preCampaign?.metaCum || 0) + (preCampaign?.dspCommitment || 0);
-      $('preDate').textContent = 'Before the main digital';
-      $('preGoogle').textContent = money(preCampaign?.googleCum || 0);
-      $('preMeta').textContent = money(preCampaign?.metaCum || 0);
-      $('preDSP').textContent = money(preCampaign?.dspCommitment || 0);
-      $('preTotal').textContent = money(preTotal);
-
-      const lifetimeGoogle = weeklySeries.reduce((sum, w) => sum + w.google, 0);
-      const lifetimeMeta = weeklySeries.reduce((sum, w) => sum + w.meta, 0);
-      const lifetimeDSP = weeklySeries.reduce((sum, w) => sum + w.dsp, 0);
-      const lifetimeTotal = lifetimeGoogle + lifetimeMeta + lifetimeDSP;
-
+      // ── Insights tab (Lifetime totals — IDs still in Insights HTML) ──
+      const lifetimeGoogle = weeklySeries.reduce((s, w) => s + w.google, 0);
+      const lifetimeMeta   = weeklySeries.reduce((s, w) => s + w.meta,   0);
+      const lifetimeDSP    = weeklySeries.reduce((s, w) => s + w.dsp,    0);
       $('lifetimeGoogle').textContent = money(lifetimeGoogle);
-      $('lifetimeMeta').textContent = money(lifetimeMeta);
-      $('lifetimeDSP').textContent = money(lifetimeDSP);
-      $('lifetimeTotal').textContent = money(lifetimeTotal);
+      $('lifetimeMeta').textContent   = money(lifetimeMeta);
+      $('lifetimeDSP').textContent    = money(lifetimeDSP);
+      $('lifetimeTotal').textContent  = money(lifetimeGoogle + lifetimeMeta + lifetimeDSP);
 
+      // ── Charts (Insights tab) ──
       const burnSeries = buildBurnSeriesFromCumulative(campaignRows, totalBudget, preCampaign);
-
       renderStackedWeeklyChart(weeklySeries);
       renderLineChart('cumulativeBurnChart', burnSeries);
       renderNewFeatures(data);
