@@ -164,16 +164,6 @@
       display: inline-block;
       margin-right: 5px;
     }
-    .chart-row {
-      margin-bottom: 10px;
-    }
-    .chart-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 0.85rem;
-      margin-bottom: 4px;
-    }
     .line-chart {
       width: 100%;
       height: 300px;
@@ -530,6 +520,101 @@
     .weekly-card tr.is-current td { background: var(--info-bg); color: var(--ink); font-weight: 600; }
     .weekly-card tr.is-pre td { color: var(--muted); font-style: italic; }
     .weekly-card tr td.total-cell { font-weight: 700; color: var(--ink); }
+
+    /* Insights — chart card + mix rows */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 14px;
+    }
+    .chart-card__title {
+      margin: 0 0 4px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .chart-card__sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .swatch-line {
+      display: inline-block;
+      width: 16px;
+      height: 3px;
+      border-radius: 2px;
+      margin-right: 6px;
+      vertical-align: middle;
+      background: var(--ink);
+    }
+    .swatch-line--planned {
+      background: repeating-linear-gradient(to right,
+        var(--planned) 0 5px, transparent 5px 8px);
+    }
+    .swatch-line--today {
+      background: repeating-linear-gradient(to right,
+        var(--ink-2) 0 4px, transparent 4px 7px);
+    }
+    .mix-row { margin-bottom: 12px; }
+    .mix-row--future .mix-stack,
+    .mix-row--future .mix-head { opacity: 0.35; }
+    .mix-row--current .mix-head {
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .mix-row--current .mix-stack {
+      border-left: 2px solid var(--info);
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+    .mix-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      color: var(--ink-2);
+      font-variant-numeric: tabular-nums;
+    }
+    .mix-stack {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      background: var(--surface-2);
+    }
+    .mix-stack > span { height: 100%; }
+    .mix-stack .google { background: var(--google); }
+    .mix-stack .meta   { background: var(--meta); }
+    .mix-stack .dsp    { background: var(--dsp); }
+    .mix-footer {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .mix-footer__label {
+      font-size: var(--fs-label);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--muted);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .mix-footer__value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
   </style>
 </head>
 <body>
@@ -615,33 +700,28 @@
       </div>
 
       <div id="insightsTab" class="tab-panel hidden">
-        <section class="card">
-          <h2 style="font-size:2rem;">Spend mix by week</h2>
+        <div class="section-label">Burn trajectory</div>
+        <section class="chart-card">
+          <h2 class="chart-card__title">Cumulative burn vs target pace</h2>
+          <div class="chart-card__sub">Daily cumulative spend against the planned pace. Shaded band shows variance.</div>
+          <div class="legend">
+            <span><span class="swatch-line"></span>Actual cumulative</span>
+            <span><span class="swatch-line swatch-line--planned"></span>Target pace</span>
+            <span><span class="swatch-line swatch-line--today"></span>Today</span>
+          </div>
+          <div id="cumulativeBurnChart" class="line-chart"></div>
+        </section>
+
+        <div class="section-label">Channel mix by week</div>
+        <section class="chart-card">
+          <h2 class="chart-card__title">Spend mix by week</h2>
+          <div class="chart-card__sub">Weekly totals split by channel. Current week highlighted; future weeks dimmed.</div>
           <div class="legend">
             <span><span class="swatch" style="background:var(--google)"></span>Google</span>
             <span><span class="swatch" style="background:var(--meta)"></span>Meta</span>
             <span><span class="swatch" style="background:var(--dsp)"></span>DSPolitical</span>
           </div>
           <div id="stackedWeeklyChart"></div>
-        </section>
-
-        <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:2rem;">Cumulative burn vs target pace</h2>
-          <div class="legend">
-            <span><span class="swatch" style="background:var(--accent)"></span>Actual cumulative spend</span>
-            <span><span class="swatch" style="background:var(--planned)"></span>Target pace</span>
-          </div>
-          <div id="cumulativeBurnChart" class="line-chart"></div>
-        </section>
-
-        <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:2rem;">Lifetime totals</h2>
-          <div class="kvs">
-            <span class="muted">Google total spend</span><span id="lifetimeGoogle">$0</span>
-            <span class="muted">Meta total spend</span><span id="lifetimeMeta">$0</span>
-            <span class="muted">DSPolitical total spend</span><span id="lifetimeDSP">$0</span>
-            <span class="muted">Combined lifetime spend</span><span id="lifetimeTotal">$0</span>
-          </div>
         </section>
       </div>
       <div id="pacingTab" class="tab-panel hidden">
@@ -792,7 +872,7 @@
       $('errorBox').classList.remove('hidden');
     }
 
-    function renderLineChart(hostId, points) {
+    function renderLineChart(hostId, points, opts = {}) {
       const host = $(hostId);
       host.innerHTML = '';
       if (!points.length) {
@@ -800,9 +880,12 @@
         return;
       }
 
+      const state = opts.state || 'neutral';
+      const today = opts.today || null;
+
       const width = 1000;
       const height = 260;
-      const pad = { top: 20, right: 20, bottom: 38, left: 56 };
+      const pad = { top: 20, right: 20, bottom: 42, left: 64 };
       const xSpan = Math.max(1, points.length - 1);
       const maxY = Math.max(1, ...points.map((p) => Math.max(p.actual, p.plan)));
 
@@ -810,24 +893,68 @@
       const y = (val) => height - pad.bottom - ((height - pad.top - pad.bottom) * val / maxY);
 
       const actualPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(p.actual).toFixed(2)}`).join(' ');
-      const planPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(p.plan).toFixed(2)}`).join(' ');
+      const planPath   = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(p.plan).toFixed(2)}`).join(' ');
 
+      // Variance fill: forward along actual, back along plan
+      const variancePath = (() => {
+        const fwd = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(p.actual).toFixed(2)}`).join(' ');
+        const back = [];
+        for (let i = points.length - 1; i >= 0; i--) {
+          back.push(`L ${x(i).toFixed(2)} ${y(points[i].plan).toFixed(2)}`);
+        }
+        return `${fwd} ${back.join(' ')} Z`;
+      })();
+      const fillMap = {
+        good:    'var(--good-bg)',
+        warn:    'var(--warn-bg)',
+        bad:     'var(--bad-bg)',
+        neutral: 'var(--info-bg)'
+      };
+      const varianceFill = fillMap[state] || fillMap.neutral;
+
+      // Y-axis gridlines + value labels
       const yTicks = 4;
       const tickMarkup = Array.from({ length: yTicks + 1 }).map((_, i) => {
         const ratio = i / yTicks;
         const val = maxY * (1 - ratio);
         const yy = pad.top + (height - pad.top - pad.bottom) * ratio;
-        return `<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" stroke="#d1d5db" stroke-width="1" />
-          <text x="${pad.left - 8}" y="${yy + 4}" text-anchor="end" fill="#6b7280" font-size="11">${money(val)}</text>`;
+        return `<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" stroke="var(--border)" stroke-width="1" />
+          <text x="${pad.left - 8}" y="${yy + 4}" text-anchor="end" fill="var(--muted)" font-size="11">${money(val)}</text>`;
       }).join('');
 
-      host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Lifetime spend line chart">
+      // Month ticks at the 1st of each month within the series
+      let monthTicks = '';
+      if (points[0] && points[0].date) {
+        points.forEach((p, i) => {
+          if (!p.date || p.date.getDate() !== 1) return;
+          const xp = x(i).toFixed(2);
+          const label = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(p.date);
+          monthTicks += `<line x1="${xp}" y1="${pad.top}" x2="${xp}" y2="${height - pad.bottom}" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 4" opacity="0.7" />`;
+          monthTicks += `<text x="${xp}" y="${height - pad.bottom + 16}" text-anchor="middle" fill="var(--muted)" font-size="11">${label}</text>`;
+        });
+      }
+
+      // Today marker
+      let todayMarker = '';
+      if (today && points[0] && points[0].date) {
+        const tTime = today.getTime();
+        const idx = points.findIndex(p => p.date && p.date.getTime() === tTime);
+        if (idx >= 0) {
+          const tx = x(idx).toFixed(2);
+          todayMarker = `
+            <line x1="${tx}" y1="${pad.top}" x2="${tx}" y2="${height - pad.bottom}" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="5 4" />
+            <text x="${(parseFloat(tx) + 6).toFixed(2)}" y="${pad.top + 12}" fill="var(--ink-2)" font-size="11" font-weight="700">Today</text>`;
+        }
+      }
+
+      host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Cumulative spend vs target pace">
         ${tickMarkup}
-        <line x1="${pad.left}" y1="${height - pad.bottom}" x2="${width - pad.right}" y2="${height - pad.bottom}" stroke="#9ca3af" stroke-width="1" />
-        <path d="${planPath}" fill="none" stroke="var(--planned)" stroke-width="3" stroke-dasharray="8 6" stroke-linejoin="round" stroke-linecap="round" />
-        <path d="${actualPath}" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" />
-        <text x="${pad.left}" y="${height - 10}" fill="#6b7280" font-size="11">${points[0].label}</text>
-        <text x="${width - pad.right}" y="${height - 10}" text-anchor="end" fill="#6b7280" font-size="11">${points[points.length - 1].label}</text>
+        ${monthTicks}
+        <path d="${variancePath}" fill="${varianceFill}" stroke="none" opacity="0.75" />
+        <line x1="${pad.left}" y1="${height - pad.bottom}" x2="${width - pad.right}" y2="${height - pad.bottom}" stroke="var(--border-2)" stroke-width="1" />
+        <path d="${planPath}" fill="none" stroke="var(--planned)" stroke-width="2.5" stroke-dasharray="8 6" stroke-linejoin="round" stroke-linecap="round" />
+        <path d="${actualPath}" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" />
+        ${todayMarker}
       </svg>`;
     }
 
@@ -839,25 +966,58 @@
         return;
       }
       const maxTotal = Math.max(1, ...weeklySeries.map((w) => w.total));
+      const totals = { google: 0, meta: 0, dsp: 0 };
+
       weeklySeries.forEach((w) => {
+        totals.google += w.google;
+        totals.meta   += w.meta;
+        totals.dsp    += w.dsp;
+
         const googlePct = (w.google / maxTotal) * 100;
-        const metaPct = (w.meta / maxTotal) * 100;
-        const dspPct = (w.dsp / maxTotal) * 100;
+        const metaPct   = (w.meta   / maxTotal) * 100;
+        const dspPct    = (w.dsp    / maxTotal) * 100;
+
+        const classes = ['mix-row'];
+        if (w.isFuture)  classes.push('mix-row--future');
+        if (w.isCurrent) classes.push('mix-row--current');
+
         const row = document.createElement('div');
-        row.className = 'chart-row';
+        row.className = classes.join(' ');
         row.innerHTML = `
-          <div class="chart-head">
+          <div class="mix-head">
             <span>${w.label}</span>
             <span>${money(w.total)}</span>
           </div>
-          <div class="stack">
-            <span class="google" style="width:${googlePct}%"></span>
-            <span class="meta" style="width:${metaPct}%"></span>
-            <span class="dsp" style="width:${dspPct}%"></span>
+          <div class="mix-stack">
+            <span class="google" style="width:${googlePct}%" title="Google · ${money(w.google)}"></span>
+            <span class="meta" style="width:${metaPct}%" title="Meta · ${money(w.meta)}"></span>
+            <span class="dsp" style="width:${dspPct}%" title="DSPolitical · ${money(w.dsp)}"></span>
           </div>
         `;
         host.appendChild(row);
       });
+
+      const footer = document.createElement('div');
+      footer.className = 'mix-footer';
+      footer.innerHTML = `
+        <div>
+          <span class="mix-footer__label">Google</span>
+          <span class="mix-footer__value">${money(totals.google)}</span>
+        </div>
+        <div>
+          <span class="mix-footer__label">Meta</span>
+          <span class="mix-footer__value">${money(totals.meta)}</span>
+        </div>
+        <div>
+          <span class="mix-footer__label">DSPolitical</span>
+          <span class="mix-footer__value">${money(totals.dsp)}</span>
+        </div>
+        <div>
+          <span class="mix-footer__label">Combined</span>
+          <span class="mix-footer__value">${money(totals.google + totals.meta + totals.dsp)}</span>
+        </div>
+      `;
+      host.appendChild(footer);
     }
 
     async function initAuth() {
@@ -1008,6 +1168,7 @@
         }
         return {
           label: dayIndex === 0 || dayIndex === totalCampaignDays - 1 ? toMMDDYYYY(pointDate) : '',
+          date: new Date(pointDate),
           actual: latestCumulative,
           plan: hasRunningBudget ? latestPlan : PRE_CAMPAIGN_BUDGET + (dayIndex / totalCampaignDays) * totalBudget
         };
@@ -1336,7 +1497,8 @@
         const ll = lastRow.label  || (lastRow.date  ? toISO(lastRow.date)  : '');
         const label = fl && ll ? (fl === ll ? fl : `${fl}–${ll}`) : (fl || ll || `Row ${start}`);
         const isCurrent = firstRow.date && lastRow.date && todayDate >= firstRow.date && todayDate <= lastRow.date;
-        weeklySeries.push({ label, google, meta, dsp, total: google + meta + dsp, isCurrent });
+        const isFuture  = firstRow.date && firstRow.date > todayDate;
+        weeklySeries.push({ label, google, meta, dsp, total: google + meta + dsp, isCurrent, isFuture });
       });
 
       weeklySeries.forEach(w => {
@@ -1348,19 +1510,10 @@
         weeklyBody.appendChild(tr);
       });
 
-      // ── Insights tab (Lifetime totals — IDs still in Insights HTML) ──
-      const lifetimeGoogle = weeklySeries.reduce((s, w) => s + w.google, 0);
-      const lifetimeMeta   = weeklySeries.reduce((s, w) => s + w.meta,   0);
-      const lifetimeDSP    = weeklySeries.reduce((s, w) => s + w.dsp,    0);
-      $('lifetimeGoogle').textContent = money(lifetimeGoogle);
-      $('lifetimeMeta').textContent   = money(lifetimeMeta);
-      $('lifetimeDSP').textContent    = money(lifetimeDSP);
-      $('lifetimeTotal').textContent  = money(lifetimeGoogle + lifetimeMeta + lifetimeDSP);
-
       // ── Charts (Insights tab) ──
       const burnSeries = buildBurnSeriesFromCumulative(campaignRows, totalBudget, preCampaign);
+      renderLineChart('cumulativeBurnChart', burnSeries, { state: pacing.state, today: todayDate });
       renderStackedWeeklyChart(weeklySeries);
-      renderLineChart('cumulativeBurnChart', burnSeries);
       renderNewFeatures(data);
     }
 
