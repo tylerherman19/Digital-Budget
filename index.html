@@ -202,25 +202,6 @@
       margin-right: 7px;
       flex-shrink: 0;
     }
-    .stale-notice {
-      font-size: 0.82rem;
-      color: #92400e;
-      background: rgba(245,158,11,0.12);
-      border: 1px solid rgba(245,158,11,0.35);
-      border-radius: 8px;
-      padding: 7px 11px;
-      margin-top: 10px;
-    }
-    .freshness-warning {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #991b1b;
-      background: rgba(239,68,68,0.08);
-      border: 1px solid rgba(239,68,68,0.35);
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin-top: 10px;
-    }
     .dsp-payment-row {
       display: flex;
       align-items: center;
@@ -231,11 +212,6 @@
       flex-wrap: wrap;
     }
     .dsp-payment-row:last-child { border-bottom: none; }
-    .dsp-toggle-btn { font-size: 0.8rem; padding: 5px 12px; border-radius: 8px; }
-    .at-risk-card {
-      border-color: var(--warn) !important;
-      background: rgba(245,158,11,0.06) !important;
-    }
     .weekly-chart-svg { width: 100%; overflow: visible; display: block; }
     .error {
       margin-top: 12px;
@@ -615,6 +591,180 @@
       font-weight: 700;
       color: var(--ink);
     }
+
+    /* ═══ Pacing tab — redesigned ═══════════════════════════════════════ */
+    .pacing-pair {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 780px) { .pacing-pair { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .panel__label {
+      font-size: var(--fs-label);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    /* Timeline panel */
+    .timeline-svg { width: 100%; display: block; overflow: visible; margin-bottom: 14px; }
+    .timeline-big {
+      display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    }
+    .timeline-big__num {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .timeline-big__unit { color: var(--muted); font-weight: 500; font-size: 0.95rem; }
+    .timeline-meta {
+      margin-top: 10px;
+      font-size: 0.88rem;
+      color: var(--ink-2);
+      font-variant-numeric: tabular-nums;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .timeline-meta .sep { color: var(--border-2); }
+    .warn-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 999px;
+      background: var(--warn-bg); color: var(--warn);
+      font-size: 0.74rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    /* Outcome panel (Projected Final) */
+    .outcome__num {
+      font-size: var(--fs-kpi);
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .outcome__chip-row {
+      margin-top: 12px;
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    .outcome__meta {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.55;
+    }
+
+    /* DSP strip under cumulative chart */
+    .dsp-strip {
+      margin-top: 8px;
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+    }
+    .dsp-strip__label {
+      font-size: var(--fs-label);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .dsp-strip__svg { width: 100%; display: block; height: 28px; overflow: visible; }
+
+    /* Weekly chart variance strip */
+    .weekly-variance-strip {
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .weekly-variance-strip strong { color: var(--ink); font-weight: 700; }
+
+    /* Channel drill-down — reuse weekly-card table shell */
+    .weekly-card td.channel-name { font-weight: 600; color: var(--ink); }
+
+    /* DSP action queue */
+    .dsp-summary {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 6px;
+    }
+    .dsp-summary__head {
+      font-size: 1rem; color: var(--ink); font-variant-numeric: tabular-nums;
+    }
+    .dsp-summary__head strong { font-weight: 700; }
+    .dsp-summary__pct { color: var(--muted); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+    .dsp-progress {
+      width: 100%;
+      height: 8px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .dsp-progress__fill {
+      height: 100%;
+      background: var(--good);
+      border-radius: inherit;
+      transition: width 0.3s ease;
+    }
+    .dsp-next {
+      background: var(--info-bg);
+      border: 1px solid rgba(29,78,216,0.2);
+      color: #1e3a8a;
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .dsp-next--warn { background: var(--warn-bg); border-color: rgba(180,83,9,0.25); color: #78350f; }
+    .dsp-next strong { font-weight: 700; }
+    .dsp-group-label {
+      font-size: var(--fs-label);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--muted);
+      font-weight: 700;
+      margin: 12px 0 4px;
+    }
+    .dsp-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px;
+    }
+    .dsp-row:last-child { border-bottom: none; }
+    .dsp-row__amount { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .dsp-row__date   { color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+    .dsp-row__right  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .dsp-action-btn {
+      border: 1px solid var(--border-2);
+      background: var(--surface);
+      color: var(--ink-2);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .dsp-action-btn:hover { border-color: var(--ink-2); color: var(--ink); }
   </style>
 </head>
 <body>
@@ -725,63 +875,68 @@
         </section>
       </div>
       <div id="pacingTab" class="tab-panel hidden">
-        <div class="grid">
 
-          <!-- Feature 1: Pacing Status -->
-          <section class="card" id="pacingStatusCard">
-            <h2 style="font-size:1.25rem;margin-bottom:10px;">Pacing Status</h2>
-            <div class="kvs">
-              <span class="muted">Budgeted to date</span><span id="pacingBudgeted">$0</span>
-              <span class="muted">Actual to date</span><span id="pacingActual">$0</span>
-              <span class="muted">Delta ($)</span><span id="pacingDeltaDollar">$0</span>
-              <span class="muted">Delta (%)</span><span id="pacingStatusDeltaPct">0%</span>
+        <!-- Section 1: Timeline — Campaign Clock + Projected Final side-by-side -->
+        <div class="section-label">Timeline</div>
+        <div class="pacing-pair">
+          <section class="panel" id="campaignClockCard">
+            <div class="panel__label">Campaign clock</div>
+            <div id="timelineSvg" class="timeline-svg"></div>
+            <div class="timeline-big">
+              <span id="clockDaysToPrimary" class="timeline-big__num">—</span>
+              <span class="timeline-big__unit" id="clockDaysUnit">days until election</span>
             </div>
-            <div style="display:flex;align-items:center;margin-top:12px;">
-              <span class="pacing-dot" id="pacingDot" style="background:var(--bar)"></span>
-              <span id="pacingStatusLabel" style="font-size:0.9rem;font-weight:600;">—</span>
-            </div>
-            <div id="pacingStaleNotice" class="stale-notice hidden"></div>
+            <div class="timeline-meta" id="clockMeta">—</div>
           </section>
 
-          <!-- Feature 2: Campaign Clock -->
-          <section class="card" id="campaignClockCard">
-            <h2 style="font-size:1.25rem;margin-bottom:10px;">Campaign Clock</h2>
-            <div class="kvs">
-              <span class="muted">Days to primary</span><span id="clockDaysToPrimary">—</span>
-              <span class="muted">Total campaign days</span><span id="clockTotalDays">—</span>
-              <span class="muted">Days elapsed</span><span id="clockElapsedDays">—</span>
-              <span class="muted">Campaign elapsed</span><span id="clockElapsedPct">0%</span>
-              <span class="muted">Budget spent (N82)</span><span id="clockBudgetSpentPct">0%</span>
-            </div>
+          <section class="panel" id="projectedSpendCard">
+            <div class="panel__label">Projected final spend</div>
+            <div id="projTotal" class="outcome__num">$0</div>
+            <div class="outcome__chip-row" id="projChipRow"></div>
+            <div class="outcome__meta" id="projMeta">—</div>
           </section>
-
-          <!-- Feature 3: Projected Final Spend -->
-          <section class="card" id="projectedSpendCard">
-            <h2 style="font-size:1.25rem;margin-bottom:10px;">Projected Final Spend</h2>
-            <div class="kvs">
-              <span class="muted">7-day avg burn (G+M)</span><span id="projBurnRate">$0/day</span>
-              <span class="muted">Projected total</span><span id="projTotal">$0</span>
-              <span class="muted">Total budget (N82)</span><span id="projTotalBudget">$0</span>
-              <span class="muted">Projected variance</span><span id="projVariance">$0</span>
-              <span class="muted">Variance %</span><span id="projVariancePct">0%</span>
-            </div>
-          </section>
-
-          <!-- Feature 4: Data Freshness -->
-          <section class="card" id="freshnessCard">
-            <h2 style="font-size:1.25rem;margin-bottom:10px;">Data Freshness</h2>
-            <div class="kvs">
-              <span class="muted">Last entry date</span><span id="freshnessDate">—</span>
-              <span class="muted">How long ago</span><span id="freshnessDaysAgo">—</span>
-            </div>
-            <div id="freshnessWarning" class="freshness-warning hidden"></div>
-          </section>
-
         </div>
 
-        <!-- Feature 5: Channel Budget Remaining -->
-        <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:1.5rem;margin-bottom:10px;">Channel Budget Remaining</h2>
+        <!-- Section 2: Trajectory — Cumulative Spend vs Plan chart -->
+        <div class="section-label">Trajectory</div>
+        <section class="panel" style="padding:22px 24px;">
+          <h2 class="chart-card__title" style="margin:0 0 4px;">Cumulative spend vs plan</h2>
+          <div class="chart-card__sub">Projected line is the dominant signal — anchored at today.</div>
+          <div class="legend" id="cumulativeLegend">
+            <span><span class="swatch-line" style="background:var(--ink)"></span>Actual</span>
+            <span><span class="swatch-line swatch-line--planned"></span>Planned</span>
+            <span><span class="swatch-line" id="cumProjSwatch"></span>Projected</span>
+            <span><span class="swatch-line swatch-line--today"></span>Today</span>
+          </div>
+          <div id="cumulativePlanChart" class="line-chart"></div>
+          <div class="dsp-strip">
+            <div class="dsp-strip__label">DSP commitments</div>
+            <div id="dspStrip" class="dsp-strip__svg"></div>
+          </div>
+        </section>
+
+        <!-- Section 3: Weekly execution -->
+        <div class="section-label">Weekly execution</div>
+        <section class="panel" style="padding:22px 24px;">
+          <h2 class="chart-card__title" style="margin:0 0 4px;">Weekly spend vs plan</h2>
+          <div class="chart-card__sub">Bars are actuals (colored by variance); dashed line is the weekly plan.</div>
+          <div class="legend">
+            <span><span class="swatch" style="background:var(--good)"></span>Within ±10% of plan</span>
+            <span><span class="swatch" style="background:var(--warn)"></span>10–25% off plan</span>
+            <span><span class="swatch" style="background:var(--bad)"></span>&gt;25% off / zero (past)</span>
+            <span><span class="swatch-line swatch-line--planned"></span>Planned</span>
+          </div>
+          <div id="weeklyBarChart" style="width:100%;overflow-x:auto;"></div>
+          <div id="weeklyVarianceStrip" class="weekly-variance-strip"></div>
+        </section>
+
+        <!-- Section 4: Details — channel drill-down + DSP tracker -->
+        <div class="section-label">Details</div>
+        <section class="weekly-card" style="margin-bottom:14px;">
+          <div style="padding:16px 20px 4px;">
+            <h2 class="chart-card__title" style="margin:0 0 2px;">Channel drill-down</h2>
+            <div class="chart-card__sub" style="margin-bottom:10px;">Burn rate and runway per channel, beyond the Summary strip.</div>
+          </div>
           <div style="overflow-x:auto;">
             <table>
               <thead>
@@ -790,8 +945,9 @@
                   <th>Allocated</th>
                   <th>Spent</th>
                   <th>Remaining</th>
-                  <th>% Used</th>
-                  <th>Projected Final</th>
+                  <th>7-day burn</th>
+                  <th>Days to exhaustion</th>
+                  <th>Projected final</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -800,38 +956,15 @@
           </div>
         </section>
 
-        <!-- Feature 6: Cumulative Spend vs Plan Chart -->
-        <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:1.5rem;margin-bottom:8px;">Cumulative Spend vs Plan</h2>
-          <div class="legend">
-            <span><span class="swatch" style="background:var(--planned)"></span>Planned (Col P)</span>
-            <span><span class="swatch" style="background:var(--accent)"></span>Actual</span>
-            <span><span class="swatch" style="background:var(--accent);opacity:0.55"></span>Projected</span>
-            <span><span class="swatch" style="background:var(--dsp)"></span>DSP Payment</span>
+        <section class="panel" id="dspTrackerSection">
+          <div class="panel__label">DSPolitical payment queue</div>
+          <div class="dsp-summary">
+            <div class="dsp-summary__head" id="dspSummaryHead">—</div>
+            <div class="dsp-summary__pct" id="dspSummaryPct">—</div>
           </div>
-          <div id="cumulativePlanChart" class="line-chart"></div>
-        </section>
-
-        <!-- Feature 7: Weekly Spend Bar Chart -->
-        <section class="card" style="margin-top:12px;">
-          <h2 style="font-size:1.5rem;margin-bottom:8px;">Weekly Spend vs Plan</h2>
-          <div class="legend">
-            <span><span class="swatch" style="background:var(--good)"></span>Within ±10% of plan</span>
-            <span><span class="swatch" style="background:var(--warn)"></span>10–25% off plan</span>
-            <span><span class="swatch" style="background:var(--bad)"></span>&gt;25% off / zero (past)</span>
-            <span><span class="swatch" style="background:none;border:2px solid var(--planned);border-radius:50%"></span>Future planned</span>
-          </div>
-          <div id="weeklyBarChart" style="width:100%;overflow-x:auto;"></div>
-        </section>
-
-        <!-- Feature 8: DSPolitical Payment Tracker -->
-        <section class="card" id="dspTrackerSection" style="margin-top:12px;">
-          <h2 style="font-size:1.5rem;margin-bottom:10px;">DSPolitical Payment Tracker</h2>
+          <div class="dsp-progress"><div id="dspProgressFill" class="dsp-progress__fill" style="width:0%"></div></div>
+          <div id="dspNext" class="dsp-next hidden"></div>
           <div id="dspPaymentRows"></div>
-          <div class="kvs" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-            <span class="muted">Total committed</span><span id="dspTotalCommitted">$0</span>
-            <span class="muted">Total paid</span><span id="dspTotalPaid">$0</span>
-          </div>
         </section>
 
       </div>
@@ -1592,94 +1725,61 @@
       return campaignRows.slice(rowIdx + 1).some(r => r.date && r.date <= todayDate && (r.googleDaily + r.metaDaily) > 0);
     }
 
-    // ── Feature 1: Pacing Status ──────────────────────────────────────────────
+    // ── Feature 2: Campaign Clock — SVG timeline ─────────────────────────────
 
-    function renderPacingStatus(campaignRows, totalsRow) {
-      const today = new Date();
-      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-      // Actual: D82 + E82 (+ M82 DSP) — authoritative cumulative totals
-      const { google: gActual, meta: mActual, dsp: dspActual, total: actualToDate } = getActualTotal(totalsRow, campaignRows);
-
-      // Planned: column P for the last row that has actual data
-      const lastActualRow = getLastActualRow(campaignRows);
-      const effectiveDate = lastActualRow ? lastActualRow.date : todayDate;
-      const effectiveRows = campaignRows.filter(r => r.date && r.date <= effectiveDate);
-      const effectiveDateRow = effectiveRows.length ? effectiveRows[effectiveRows.length - 1] : null;
-      const budgetedToDate = (effectiveDateRow ? effectiveDateRow.runningBudget : 0) + PRE_CAMPAIGN_BUDGET;
-
-      const delta = actualToDate - budgetedToDate;
-      const deltaPct = budgetedToDate ? (delta / budgetedToDate) * 100 : 0;
-      const absPct = Math.abs(deltaPct);
-
-      let colorClass, statusText, dotColor;
-      if (delta > 0) {
-        colorClass = 'bad';  statusText = 'Overspend';          dotColor = 'var(--bad)';
-      } else if (absPct > 25) {
-        colorClass = 'bad';  statusText = '>25% Under Plan';    dotColor = 'var(--bad)';
-      } else if (absPct > 10) {
-        colorClass = 'warn'; statusText = '10–25% Under Plan';  dotColor = 'var(--warn)';
-      } else {
-        colorClass = 'good'; statusText = 'On Plan';            dotColor = 'var(--good)';
-      }
-
-      $('pacingBudgeted').textContent = money(budgetedToDate);
-      $('pacingActual').textContent   = money(actualToDate);
-      const sign = delta >= 0 ? '+' : '';
-      $('pacingDeltaDollar').textContent = `${sign}${money(delta)}`;
-      $('pacingDeltaDollar').className   = colorClass;
-      $('pacingStatusDeltaPct').textContent = `${sign}${absPct.toFixed(1)}%`;
-      $('pacingStatusDeltaPct').className   = colorClass;
-      $('pacingDot').style.background    = dotColor;
-      $('pacingStatusLabel').textContent = statusText;
-      $('pacingStatusLabel').className   = colorClass;
-
-      const staleEl = $('pacingStaleNotice');
-      const daysAgo = daysBetween(effectiveDate, todayDate);
-      const lines = [];
-      if (lastActualRow && daysAgo > 0) lines.push(`Data as of ${toMMDDYYYY(effectiveDate)} (${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago)`);
-      if (lines.length) {
-        staleEl.textContent = lines.join(' · ');
-        staleEl.classList.remove('hidden');
-      } else {
-        staleEl.classList.add('hidden');
-      }
-    }
-
-    // ── Feature 2: Campaign Clock ─────────────────────────────────────────────
-
-    function renderCampaignClock(campaignRows, totalsRow) {
+    function renderCampaignClock(campaignRows, totalsRow, pacingState) {
       const today = new Date();
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
       const dated = campaignRows.filter(r => r.date).sort((a, b) => a.date - b.date);
-      const firstDay    = dated.length ? dated[0].date : null;
-      const primaryDate = dated.length ? dated[dated.length - 1].date : null;
+      const firstDay    = dated.length ? dated[0].date : CAMPAIGN_START;
+      const primaryDate = dated.length ? dated[dated.length - 1].date : PRIMARY_DATE;
 
-      const totalDays   = (firstDay && primaryDate) ? daysBetween(firstDay, primaryDate) + 1 : 0;
-      const elapsedDays = firstDay ? Math.max(0, Math.min(totalDays, daysBetween(firstDay, todayDate) + 1)) : 0;
-      const daysToPrim  = primaryDate ? Math.max(0, daysBetween(todayDate, primaryDate)) : 0;
+      const totalDays   = daysBetween(firstDay, primaryDate) + 1;
+      const elapsedDays = Math.max(0, Math.min(totalDays, daysBetween(firstDay, todayDate) + 1));
+      const daysToPrim  = Math.max(0, daysBetween(todayDate, primaryDate));
       const elapsedPct  = totalDays ? (elapsedDays / totalDays) * 100 : 0;
 
-      const totalBudgetN82 = totalsRow.dailyTotalBudget;
+      const totalBudgetN82 = totalsRow.dailyTotalBudget || totalsRow.weeklyBurn || 0;
       const { total: actualToDate } = getActualTotal(totalsRow, campaignRows);
       const budgetSpentPct = totalBudgetN82 ? (actualToDate / totalBudgetN82) * 100 : 0;
 
-      $('clockDaysToPrimary').textContent  = daysToPrim;
-      $('clockTotalDays').textContent      = totalDays;
-      $('clockElapsedDays').textContent    = elapsedDays;
-      $('clockElapsedPct').textContent     = pct(elapsedPct);
-      $('clockBudgetSpentPct').textContent = pct(budgetSpentPct);
+      // SVG horizontal timeline
+      const svgW = 400, svgH = 52;
+      const padL = 8, padR = 8;
+      const barY = 20, barH = 12, tickH = 8;
+      const totalSpan = daysBetween(firstDay, primaryDate) || 1;
+      const todayFrac = Math.min(1, Math.max(0, daysBetween(firstDay, todayDate) / totalSpan));
+      const stateColor = { good: 'var(--good)', warn: 'var(--warn)', bad: 'var(--bad)', neutral: 'var(--info)' }[pacingState] || 'var(--info)';
+      const barXStart = padL, barXEnd = svgW - padR;
+      const barTotalW = barXEnd - barXStart;
+      const todayX = (barXStart + todayFrac * barTotalW).toFixed(1);
+      const fmt = d => d ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(d) : '—';
 
-      const card = $('campaignClockCard');
-      if ((elapsedPct - budgetSpentPct) > 15) {
-        card.classList.add('at-risk-card');
-      } else {
-        card.classList.remove('at-risk-card');
-      }
+      $('timelineSvg').innerHTML = `<svg viewBox="0 0 ${svgW} ${svgH}" class="timeline-svg" role="img" aria-label="Campaign timeline">
+        <rect x="${barXStart}" y="${barY}" width="${barTotalW}" height="${barH}" rx="6" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1"/>
+        <rect x="${barXStart}" y="${barY}" width="${Math.max(0, todayFrac * barTotalW).toFixed(1)}" height="${barH}" rx="6" fill="${stateColor}" opacity="0.85"/>
+        <line x1="${barXStart}" y1="${barY - tickH}" x2="${barXStart}" y2="${barY + barH}" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="${barXStart}" y="${barY - tickH - 3}" text-anchor="start" fill="var(--muted)" font-size="10">${fmt(firstDay)}</text>
+        <line x1="${todayX}" y1="${barY - tickH}" x2="${todayX}" y2="${barY + barH}" stroke="var(--ink-2)" stroke-width="2"/>
+        <text x="${todayX}" y="${barY + barH + 13}" text-anchor="middle" fill="var(--ink-2)" font-size="10" font-weight="700">Today</text>
+        <line x1="${barXEnd}" y1="${barY - tickH}" x2="${barXEnd}" y2="${barY + barH}" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="${barXEnd}" y="${barY - tickH - 3}" text-anchor="end" fill="var(--muted)" font-size="10">${fmt(primaryDate)}</text>
+      </svg>`;
+
+      // Big countdown number
+      $('clockDaysToPrimary').textContent = daysToPrim;
+      $('clockDaysUnit').textContent = daysToPrim === 1 ? 'day until election' : 'days until election';
+
+      // Meta line + optional at-risk chip
+      const lead = elapsedPct - budgetSpentPct;
+      const chipHtml = lead > THRESHOLDS.atRiskLead
+        ? ` <span class="warn-chip">Time leading spend by ${lead.toFixed(0)}pts</span>`
+        : '';
+      $('clockMeta').innerHTML = `${elapsedDays} of ${totalDays} days elapsed <span class="sep">·</span> ${budgetSpentPct.toFixed(0)}% of budget spent${chipHtml}`;
     }
 
-    // ── Feature 3: Projected Final Spend ─────────────────────────────────────
+    // ── Feature 3: Projected Final Spend — outcome card ──────────────────────
 
     function renderProjectedFinalSpend(campaignRows, totalsRow) {
       const today = new Date();
@@ -1696,64 +1796,26 @@
       const unpaidDSP = Math.max(0, totalDSP - paidDSP);
 
       const projectedTotal  = actualToDate + burnRate * daysRemaining + unpaidDSP;
-      const totalBudgetN82  = totalsRow.dailyTotalBudget;
+      const totalBudgetN82  = totalsRow.dailyTotalBudget || totalsRow.weeklyBurn || 0;
       const projVariance    = projectedTotal - totalBudgetN82;
       const projVariancePct = totalBudgetN82 ? (projVariance / totalBudgetN82) * 100 : 0;
 
-      let sc;
-      if (projVariance > 0)                       sc = 'bad';
-      else if (Math.abs(projVariancePct) > 10)    sc = 'warn';
-      else                                         sc = 'good';
+      let chipCls;
+      if (projVariance > 0)                      chipCls = 'bad';
+      else if (Math.abs(projVariancePct) > 10)   chipCls = 'warn';
+      else                                        chipCls = 'good';
 
-      $('projBurnRate').textContent      = `${money(burnRate)}/day`;
-      $('projTotal').textContent         = money(projectedTotal);
-      $('projTotalBudget').textContent   = money(totalBudgetN82);
-      const vs = projVariance >= 0 ? '+' : '';
-      $('projVariance').textContent      = `${vs}${money(projVariance)}`;
-      $('projVariance').className        = sc;
-      $('projVariancePct').textContent   = `${vs}${Math.abs(projVariancePct).toFixed(1)}%`;
-      $('projVariancePct').className     = sc;
+      const sign     = projVariance >= 0 ? '+' : '−';
+      const absDelta = money(Math.abs(projVariance));
+      const absPct   = Math.abs(projVariancePct).toFixed(1);
+      const label    = projVariance >= 0 ? 'over budget' : 'under budget';
+
+      $('projTotal').textContent = money(projectedTotal);
+      $('projChipRow').innerHTML = `<span class="delta-chip delta-chip--${chipCls}">${sign}${absDelta} · ${absPct}% ${label}</span>`;
+      $('projMeta').textContent  = `Based on ${money(burnRate)}/day 7-day avg · ${daysRemaining} days remaining · +${money(unpaidDSP)} unpaid DSP`;
     }
 
-    // ── Feature 4: Data Freshness ─────────────────────────────────────────────
-
-    function renderDataFreshness(campaignRows, preCampaign) {
-      const today = new Date();
-      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-      const lastActualRow = getLastActualRow(campaignRows);
-      const card = $('freshnessCard');
-      const warningEl = $('freshnessWarning');
-      const preSpend = preCampaign ? (preCampaign.googleCum || 0) + (preCampaign.metaCum || 0) : 0;
-
-      if (lastActualRow && lastActualRow.date) {
-        const daysAgo = daysBetween(lastActualRow.date, todayDate);
-        $('freshnessDate').textContent    = toMMDDYYYY(lastActualRow.date);
-        $('freshnessDaysAgo').textContent = daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago`;
-        if (daysAgo > 2) {
-          warningEl.textContent = `⚠ Dashboard data may be stale — last campaign entry was ${daysAgo} days ago`;
-          warningEl.classList.remove('hidden');
-          card.classList.add('at-risk-card');
-        } else {
-          warningEl.classList.add('hidden');
-          card.classList.remove('at-risk-card');
-        }
-      } else if (preSpend > 0) {
-        $('freshnessDate').textContent    = 'Pre-campaign only';
-        $('freshnessDaysAgo').textContent = 'No campaign entries yet';
-        warningEl.textContent = `ℹ ${money(preSpend)} was spent before campaign launch (row 2). No campaign-period actuals have been entered yet.`;
-        warningEl.classList.remove('hidden');
-        warningEl.style.cssText = 'background:rgba(59,132,207,0.08);border:1px solid rgba(59,132,207,0.3);color:var(--accent);font-size:0.85rem;font-weight:500;border-radius:8px;padding:8px 12px;margin-top:10px;';
-        card.classList.remove('at-risk-card');
-      } else {
-        $('freshnessDate').textContent    = 'No actuals entered yet';
-        $('freshnessDaysAgo').textContent = '—';
-        warningEl.classList.add('hidden');
-        card.classList.remove('at-risk-card');
-      }
-    }
-
-    // ── Feature 5: Channel Budget Remaining ──────────────────────────────────
+    // ── Feature 5: Channel Drill-down (7-day burn + days to exhaustion) ──────
 
     function renderChannelBudgetTable(campaignRows, totalsRow) {
       const today = new Date();
@@ -1765,49 +1827,50 @@
       const daysRemaining  = primaryDate ? Math.max(0, daysBetween(todayDate, primaryDate)) : 0;
       const burnRate7      = get7DayBurnRate(campaignRows, lastActualDate);
 
-      const googleDisplayAlloc = totalsRow.googleDisplayBudget;
-      const googleSearchAlloc  = totalsRow.googleSearchBudget;
-      const googleAlloc        = googleDisplayAlloc + googleSearchAlloc;
-      const metaReachAlloc     = parseMoney(totalsRow.raw ? totalsRow.raw[META_REACH_IDX] : 0);
-      const metaVoterAlloc     = totalsRow.metaVoterFile;
-      const metaAlloc          = metaReachAlloc + metaVoterAlloc;
-      const dspAlloc           = totalsRow.dspCommitment;
+      const googleAlloc    = totalsRow.googleDisplayBudget + totalsRow.googleSearchBudget;
+      const metaReachAlloc = parseMoney(totalsRow.raw ? totalsRow.raw[META_REACH_IDX] : 0);
+      const metaAlloc      = metaReachAlloc + totalsRow.metaVoterFile;
+      const dspAlloc       = totalsRow.dspCommitment;
 
-      // D82 and E82 are authoritative — use totalsRow directly
-      const googleTotalSpent = totalsRow.googleCum || 0;
-      const metaTotalSpent   = totalsRow.metaCum   || 0;
-      const dspSpent         = totalsRow.dspTotalSpend || computePaidDSP(campaignRows, todayDate);
+      const googleSpent = totalsRow.googleCum || 0;
+      const metaSpent   = totalsRow.metaCum   || 0;
+      const dspSpent    = totalsRow.dspTotalSpend || computePaidDSP(campaignRows, todayDate);
 
       const totalGMAlloc = googleAlloc + metaAlloc;
-      const googleBurn = totalGMAlloc > 0 ? burnRate7 * (googleAlloc / totalGMAlloc) : 0;
-      const metaBurn   = totalGMAlloc > 0 ? burnRate7 * (metaAlloc   / totalGMAlloc) : 0;
+      const googleBurn   = totalGMAlloc > 0 ? burnRate7 * (googleAlloc / totalGMAlloc) : 0;
+      const metaBurn     = totalGMAlloc > 0 ? burnRate7 * (metaAlloc   / totalGMAlloc) : 0;
 
       const channels = [
-        { name: 'Google',      alloc: googleAlloc, spent: googleTotalSpent, projFinal: googleTotalSpent + googleBurn * daysRemaining },
-        { name: 'Meta',        alloc: metaAlloc,   spent: metaTotalSpent,   projFinal: metaTotalSpent   + metaBurn   * daysRemaining },
-        { name: 'DSPolitical', alloc: dspAlloc,    spent: dspSpent,         projFinal: dspAlloc }
+        { name: 'Google',      alloc: googleAlloc, spent: googleSpent, burn7: googleBurn, projFinal: googleSpent + googleBurn * daysRemaining },
+        { name: 'Meta',        alloc: metaAlloc,   spent: metaSpent,   burn7: metaBurn,   projFinal: metaSpent   + metaBurn   * daysRemaining },
+        { name: 'DSPolitical', alloc: dspAlloc,    spent: dspSpent,    burn7: null,       projFinal: dspAlloc }
       ];
 
       const tbody = $('channelRemainingBody');
       tbody.innerHTML = '';
       channels.forEach(ch => {
-        const remaining = ch.alloc - ch.spent;
-        const usedPct   = ch.alloc ? (ch.spent / ch.alloc) * 100 : 0;
+        const remaining        = Math.max(0, ch.alloc - ch.spent);
+        const daysToExhaustion = (ch.burn7 && ch.burn7 > 0) ? Math.round(remaining / ch.burn7) : null;
+        const burn7Str         = ch.burn7 !== null ? `${money(ch.burn7)}/day` : '—';
+        const daysStr          = daysToExhaustion !== null ? `${daysToExhaustion}d` : '—';
         let status, sCls;
-        if (remaining <= 0)            { status = 'Exhausted'; sCls = 'badge-bad';  }
+        if (remaining <= 0)               { status = 'Exhausted'; sCls = 'badge-bad';  }
         else if (ch.projFinal > ch.alloc) { status = 'At Risk';   sCls = 'badge-warn'; }
-        else                           { status = 'On Track';  sCls = 'badge-good'; }
+        else                              { status = 'On Track';  sCls = 'badge-good'; }
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${ch.name}</td><td>${money(ch.alloc)}</td><td>${money(ch.spent)}</td><td>${money(remaining)}</td><td>${pct(usedPct)}</td><td>${money(ch.projFinal)}</td><td><span class="status-badge ${sCls}">${status}</span></td>`;
+        tr.innerHTML = `<td class="channel-name">${ch.name}</td><td>${money(ch.alloc)}</td><td>${money(ch.spent)}</td><td>${money(remaining)}</td><td>${burn7Str}</td><td>${daysStr}</td><td>${money(ch.projFinal)}</td><td><span class="status-badge ${sCls}">${status}</span></td>`;
         tbody.appendChild(tr);
       });
     }
 
-    // ── Feature 6: Cumulative Spend vs Plan Chart ─────────────────────────────
+    // ── Feature 6: Cumulative Spend vs Plan Chart (redesigned) ───────────────
 
-    function renderCumulativeVsPlanChart(campaignRows, totalsRow, preCampaign) {
+    function renderCumulativeVsPlanChart(campaignRows, totalsRow, preCampaign, pacingState) {
       const host = $('cumulativePlanChart');
       host.innerHTML = '';
+
+      const today = new Date();
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
       const dated = campaignRows.filter(r => r.date).sort((a, b) => a.date - b.date);
       if (!dated.length) { host.textContent = 'No campaign data available.'; return; }
@@ -1817,12 +1880,10 @@
       const lastActualRow  = getLastActualRow(campaignRows);
       const lastActualDate = lastActualRow ? lastActualRow.date : null;
       const effectiveLastActualDate = lastActualDate ?? (preCampaignSpend > 0 && dated.length ? dated[0].date : null);
-      const burnRate       = get7DayBurnRate(campaignRows, lastActualDate);
+      const burnRate = get7DayBurnRate(campaignRows, lastActualDate);
 
-      // Build planned and actual arrays (both include pre-campaign budget offset)
       const planned = dated.map(r => r.runningBudget + PRE_CAMPAIGN_BUDGET);
 
-      // Actual: step function (carry forward last known total cumulative spend)
       const actual = [];
       let lastKnown = preCampaignSpend;
       dated.forEach(r => {
@@ -1835,11 +1896,8 @@
         }
       });
 
-      // Find index of last actual point
       let lastActualIdx = -1;
       actual.forEach((v, i) => { if (v !== null) lastActualIdx = i; });
-
-      // Build projected path (from last actual onward, using burn rate)
       const projBase = lastActualIdx >= 0 ? actual[lastActualIdx] : null;
 
       const width = 1000, height = 260;
@@ -1856,39 +1914,40 @@
       const xScale = i => pad.left + (i / Math.max(1, n - 1)) * chartW;
       const yScale = v => pad.top  + chartH - (v / maxY) * chartH;
 
-      // Y gridlines
+      // Y gridlines — tokenized
       let grid = '';
       for (let t = 0; t <= 4; t++) {
         const ratio = t / 4;
         const val = maxY * (1 - ratio);
         const yy  = pad.top + chartH * ratio;
-        grid += `<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" stroke="#d1d5db" stroke-width="1"/>`;
-        grid += `<text x="${pad.left - 6}" y="${yy + 4}" text-anchor="end" fill="#6b7280" font-size="11">${money(val)}</text>`;
+        grid += `<line x1="${pad.left}" y1="${yy}" x2="${width - pad.right}" y2="${yy}" stroke="var(--border)" stroke-width="1"/>`;
+        grid += `<text x="${pad.left - 6}" y="${yy + 4}" text-anchor="end" fill="var(--muted)" font-size="11">${money(val)}</text>`;
       }
 
-      // X axis + date labels
-      const axisLine = `<line x1="${pad.left}" y1="${pad.top + chartH}" x2="${width - pad.right}" y2="${pad.top + chartH}" stroke="#9ca3af" stroke-width="1"/>`;
-      let xLabels = `<text x="${xScale(0).toFixed(1)}" y="${height - 4}" text-anchor="start" fill="#6b7280" font-size="11">${toMMDDYYYY(dated[0].date)}</text>`;
-      xLabels    += `<text x="${xScale(n - 1).toFixed(1)}" y="${height - 4}" text-anchor="end" fill="#6b7280" font-size="11">${toMMDDYYYY(dated[n - 1].date)}</text>`;
+      // X axis + month labels — tokenized
+      const axisLine = `<line x1="${pad.left}" y1="${pad.top + chartH}" x2="${width - pad.right}" y2="${pad.top + chartH}" stroke="var(--border-2)" stroke-width="1"/>`;
+      let xLabels = `<text x="${xScale(0).toFixed(1)}" y="${height - 4}" text-anchor="start" fill="var(--muted)" font-size="11">${toMMDDYYYY(dated[0].date)}</text>`;
+      xLabels    += `<text x="${xScale(n - 1).toFixed(1)}" y="${height - 4}" text-anchor="end" fill="var(--muted)" font-size="11">${toMMDDYYYY(dated[n - 1].date)}</text>`;
       dated.forEach((r, i) => {
         if (r.date && r.date.getDate() === 1) {
           const xp = xScale(i).toFixed(1);
-          xLabels += `<line x1="${xp}" y1="${pad.top}" x2="${xp}" y2="${pad.top + chartH}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 4"/>`;
-          xLabels += `<text x="${xp}" y="${height - 4}" text-anchor="middle" fill="#6b7280" font-size="11">${new Intl.DateTimeFormat('en-US', { month: 'short' }).format(r.date)}</text>`;
+          xLabels += `<line x1="${xp}" y1="${pad.top}" x2="${xp}" y2="${pad.top + chartH}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 5" opacity="0.6"/>`;
+          xLabels += `<text x="${xp}" y="${height - 4}" text-anchor="middle" fill="var(--muted)" font-size="11">${new Intl.DateTimeFormat('en-US', { month: 'short' }).format(r.date)}</text>`;
         }
       });
 
-      // Planned path
+      // Planned — 2.5px dashed, moderate
       const plannedPath = dated.map((r, i) => `${i === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(planned[i]).toFixed(1)}`).join(' ');
 
-      // Actual path
+      // Actual — 3.5px solid ink (heaviest past line)
       const actSegs = [];
       actual.forEach((v, i) => {
         if (v !== null) actSegs.push(`${actSegs.length === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(v).toFixed(1)}`);
       });
       const actualPath = actSegs.join(' ');
 
-      // Projected path (only if burn rate > 0 and actuals exist)
+      // Projected — DOMINANT: 3px dashed, state-colored
+      const projColor = { good: 'var(--good)', warn: 'var(--warn)', bad: 'var(--bad)', neutral: 'var(--info)' }[pacingState] || 'var(--info)';
       let projPath = '';
       if (projBase !== null && burnRate > 0) {
         const pSegs = [];
@@ -1901,26 +1960,68 @@
         projPath = pSegs.join(' ');
       }
 
-      // DSP markers
-      let dspMarkers = '';
-      campaignRows.filter(r => r.date && r.dspCommitment > 0).forEach(r => {
-        const i = dated.findIndex(d => d.date && d.date.getTime() === r.date.getTime());
-        if (i >= 0) {
-          const xp = xScale(i).toFixed(1);
-          dspMarkers += `<line x1="${xp}" y1="${pad.top}" x2="${xp}" y2="${pad.top + chartH}" stroke="var(--dsp)" stroke-width="2" stroke-dasharray="4 3"/>`;
-          dspMarkers += `<text x="${(parseFloat(xp) + 5).toFixed(1)}" y="${(pad.top + 16).toFixed(1)}" fill="var(--dsp)" font-size="11" font-weight="600">${money(r.dspCommitment)}</text>`;
+      // Update legend swatch color for projected line
+      const swatchEl = $('cumProjSwatch');
+      if (swatchEl) {
+        swatchEl.style.background = `repeating-linear-gradient(to right, ${projColor} 0 6px, transparent 6px 10px)`;
+      }
+
+      // Today anchor — vertical dashed line + two dots + compact callout
+      let todayAnchor = '';
+      const todayIdx = dated.findIndex(r => r.date && r.date.getTime() === todayDate.getTime());
+      if (todayIdx >= 0) {
+        const tx  = xScale(todayIdx);
+        const txs = tx.toFixed(1);
+        const av  = actual[todayIdx];
+        const pv  = planned[todayIdx];
+        todayAnchor += `<line x1="${txs}" y1="${pad.top}" x2="${txs}" y2="${pad.top + chartH}" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+        if (av !== null) {
+          todayAnchor += `<circle cx="${txs}" cy="${yScale(av).toFixed(1)}" r="4" fill="var(--ink)" stroke="var(--surface)" stroke-width="1.5"/>`;
+          todayAnchor += `<circle cx="${txs}" cy="${yScale(pv).toFixed(1)}" r="4" fill="var(--planned)" stroke="var(--surface)" stroke-width="1.5"/>`;
+          const delta   = av - pv;
+          const dPct    = pv ? (delta / pv * 100) : 0;
+          const dsign   = delta >= 0 ? '+' : '−';
+          const callout = `${money(av)} actual vs ${money(pv)} planned · ${dsign}${Math.abs(dPct).toFixed(1)}%`;
+          const lx      = tx + 8 > width - pad.right - 200 ? tx - 8 : tx + 8;
+          const anchor  = tx + 8 > width - pad.right - 200 ? 'end' : 'start';
+          todayAnchor  += `<rect x="${anchor === 'end' ? lx - 192 : lx}" y="${pad.top + 3}" width="192" height="18" rx="4" fill="var(--surface)" opacity="0.9"/>`;
+          todayAnchor  += `<text x="${lx}" y="${pad.top + 15}" text-anchor="${anchor}" fill="var(--ink-2)" font-size="10" font-weight="600">${callout}</text>`;
         }
-      });
+      }
 
       host.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Cumulative spend vs plan">
-        ${grid}${axisLine}${xLabels}${dspMarkers}
+        ${grid}${axisLine}${xLabels}
         <path d="${plannedPath}" fill="none" stroke="var(--planned)" stroke-width="2.5" stroke-dasharray="8 5" stroke-linejoin="round"/>
-        ${actualPath ? `<path d="${actualPath}" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
-        ${projPath   ? `<path d="${projPath}"   fill="none" stroke="var(--accent)" stroke-width="2"   stroke-dasharray="6 4" opacity="0.6" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+        ${actualPath ? `<path d="${actualPath}" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+        ${projPath   ? `<path d="${projPath}"   fill="none" stroke="${projColor}" stroke-width="3" stroke-dasharray="7 5" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+        ${todayAnchor}
       </svg>`;
+
+      // DSP commitments strip below chart
+      renderDSPStrip(campaignRows, dated, xScale, width, pad);
     }
 
-    // ── Feature 7: Weekly Spend Bar Chart ─────────────────────────────────────
+    function renderDSPStrip(campaignRows, dated, xScale, width, pad) {
+      const host = $('dspStrip');
+      if (!host) return;
+      const dspRows = campaignRows.filter(r => r.date && r.dspCommitment > 0);
+      if (!dspRows.length) {
+        host.innerHTML = `<svg viewBox="0 0 ${width} 24" style="width:100%;display:block;height:24px;"><text x="${pad.left}" y="17" fill="var(--muted)" font-size="11">No DSP commitments in sheet.</text></svg>`;
+        return;
+      }
+      let marks = '';
+      dspRows.forEach(r => {
+        const i = dated.findIndex(d => d.date && d.date.getTime() === r.date.getTime());
+        if (i < 0) return;
+        const xp = xScale(i).toFixed(1);
+        marks += `<line x1="${xp}" y1="6" x2="${xp}" y2="18" stroke="var(--dsp)" stroke-width="2"/>`;
+        marks += `<circle cx="${xp}" cy="6" r="3" fill="var(--dsp)"/>`;
+        marks += `<text x="${(parseFloat(xp) + 5).toFixed(1)}" y="17" fill="var(--dsp)" font-size="10" font-weight="600">${money(r.dspCommitment)}</text>`;
+      });
+      host.innerHTML = `<svg viewBox="0 0 ${width} 24" style="width:100%;display:block;height:24px;overflow:visible;" role="img" aria-label="DSP commitments">${marks}</svg>`;
+    }
+
+    // ── Feature 7: Weekly Spend Bar Chart (redesigned) ───────────────────────
 
     function renderWeeklyBarChart(campaignRows, totalsRow, preCampaign) {
       const host = $('weeklyBarChart');
@@ -1930,9 +2031,9 @@
       const today = new Date();
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-      const weekStarts   = [2, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
-      const campaignEnd  = 80;
-      const weekRanges   = weekStarts.map((start, idx) => {
+      const weekStarts  = [2, 10, 17, 24, 31, 38, 45, 52, 59, 66, 73];
+      const campaignEnd = 80;
+      const weekRanges  = weekStarts.map((start, idx) => {
         const nextStart = weekStarts[idx + 1];
         return { start: Math.max(start, 3), end: Math.min(nextStart ? nextStart - 1 : campaignEnd, campaignEnd) };
       }).filter(({ start, end }) => start <= end);
@@ -1940,20 +2041,16 @@
       const weeks = weekRanges.map(({ start, end }) => {
         const rows = campaignRows.filter(r => r.sheetRow >= start && r.sheetRow <= end);
         if (!rows.length) return null;
-
-        const firstRow = rows[0];
-        const lastRow  = rows[rows.length - 1];
+        const firstRow    = rows[0];
+        const lastRow     = rows[rows.length - 1];
         const actualSpend = rows.reduce((s, r) => s + r.googleDaily + r.metaDaily, 0);
-
         const firstRowIdx = campaignRows.indexOf(firstRow);
         const prevRow     = firstRowIdx > 0 ? campaignRows[firstRowIdx - 1] : null;
         const prevPlanned = prevRow ? prevRow.runningBudget : 0;
         const plannedSpend = Math.max(0, lastRow.runningBudget - prevPlanned);
-
         const isFuture = firstRow.date && firstRow.date > todayDate;
         const isPast   = lastRow.date  && lastRow.date  < todayDate;
-
-        let barColor = 'var(--accent)';
+        let barColor = 'var(--good)';
         if (!isFuture) {
           const diff = plannedSpend > 0
             ? Math.abs((actualSpend - plannedSpend) / plannedSpend) * 100
@@ -1963,123 +2060,199 @@
           else if (diff > 10)             barColor = 'var(--warn)';
           else                            barColor = 'var(--good)';
         }
-
         const fl = firstRow.label || (firstRow.date ? toMMDDYYYY(firstRow.date) : '');
-        const ll = lastRow.label  || (lastRow.date  ? toMMDDYYYY(lastRow.date)  : '');
-        const label = fl && ll && fl !== ll ? `${fl}–${ll}` : (fl || ll || `Row ${start}`);
-
-        return { label, actualSpend, plannedSpend, isFuture, barColor };
+        const label = fl || `Row ${start}`;
+        return { label, actualSpend, plannedSpend, isFuture, barColor, isPreCampaign: false };
       }).filter(Boolean);
 
-      const preCampaignSpend = preCampaign
-        ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0))
-        : 0;
+      const preCampaignSpend = preCampaign ? ((preCampaign.googleCum || 0) + (preCampaign.metaCum || 0)) : 0;
       if (PRE_CAMPAIGN_BUDGET > 0 || preCampaignSpend > 0) {
         const preDiff = PRE_CAMPAIGN_BUDGET > 0
           ? Math.abs((preCampaignSpend - PRE_CAMPAIGN_BUDGET) / PRE_CAMPAIGN_BUDGET) * 100
           : (preCampaignSpend === 0 ? 100 : 0);
         const preColor = preDiff > 25 ? 'var(--bad)' : preDiff > 10 ? 'var(--warn)' : 'var(--good)';
-        weeks.unshift({ label: 'Pre-Campaign', actualSpend: preCampaignSpend, plannedSpend: PRE_CAMPAIGN_BUDGET, isFuture: false, barColor: preColor });
+        weeks.unshift({ label: 'Pre-Campaign', actualSpend: preCampaignSpend, plannedSpend: PRE_CAMPAIGN_BUDGET, isFuture: false, barColor: preColor, isPreCampaign: true });
       }
 
       if (!weeks.length) { host.textContent = 'No weekly data.'; return; }
 
-      const n     = weeks.length;
-      const svgW  = 1000, svgH = 320;
-      const pad   = { top: 20, right: 20, bottom: 80, left: 72 };
+      const n      = weeks.length;
+      const svgW   = 1000, svgH = 340;
+      const pad    = { top: 28, right: 24, bottom: 80, left: 72 };
       const chartW = svgW - pad.left - pad.right;
       const chartH = svgH - pad.top  - pad.bottom;
       const slotW  = chartW / n;
-      const barW   = slotW * 0.62;
+      const barW   = slotW * 0.60;
       const maxVal = Math.max(1, ...weeks.map(w => Math.max(w.actualSpend, w.plannedSpend)));
 
-      const yScale  = v => pad.top + chartH - (v / maxVal) * chartH;
-      const xCenter = i => pad.left + (i + 0.5) * slotW;
+      const yScale   = v  => pad.top + chartH - (v / maxVal) * chartH;
+      const xCenter  = i  => pad.left + (i + 0.5) * slotW;
+      const xSlotL   = i  => pad.left + i * slotW;
 
+      // Y-axis label
+      const yLabel = `<text x="${pad.left - 10}" y="${pad.top - 10}" text-anchor="middle" fill="var(--muted)" font-size="11" font-weight="600">Weekly spend</text>`;
+
+      // Grid lines — tokenized
       let gridLines = '';
       for (let t = 0; t <= 4; t++) {
         const ratio = t / 4;
         const val   = maxVal * (1 - ratio);
         const yy    = pad.top + chartH * ratio;
-        gridLines += `<line x1="${pad.left}" y1="${yy}" x2="${svgW - pad.right}" y2="${yy}" stroke="#e5e7eb" stroke-width="1"/>`;
-        gridLines += `<text x="${pad.left - 6}" y="${yy + 4}" text-anchor="end" fill="#6b7280" font-size="11">${money(val)}</text>`;
+        gridLines += `<line x1="${pad.left}" y1="${yy}" x2="${svgW - pad.right}" y2="${yy}" stroke="var(--border)" stroke-width="1"/>`;
+        gridLines += `<text x="${pad.left - 6}" y="${yy + 4}" text-anchor="end" fill="var(--muted)" font-size="11">${money(val)}</text>`;
       }
-      const axisLine = `<line x1="${pad.left}" y1="${pad.top + chartH}" x2="${svgW - pad.right}" y2="${pad.top + chartH}" stroke="#9ca3af" stroke-width="1"/>`;
+      const axisLine = `<line x1="${pad.left}" y1="${pad.top + chartH}" x2="${svgW - pad.right}" y2="${pad.top + chartH}" stroke="var(--border-2)" stroke-width="1"/>`;
 
       let bars = '';
+      let cumActual = 0, cumPlanned = 0, pastWeekCount = 0;
+
       weeks.forEach((w, i) => {
-        const cx  = xCenter(i);
-        const bx  = cx - barW / 2;
+        const cx    = xCenter(i);
+        const bx    = cx - barW / 2;
+        const slotX = xSlotL(i);
+
+        if (!w.isFuture) { cumActual += w.actualSpend; cumPlanned += w.plannedSpend; }
+        if (!w.isFuture && !w.isPreCampaign) pastWeekCount++;
 
         if (w.isFuture) {
-          const barH = Math.max(1, (w.plannedSpend / maxVal) * chartH);
-          const barY = yScale(w.plannedSpend);
-          bars += `<rect x="${bx.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" fill="none" stroke="var(--planned)" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>`;
+          // Future slot: subtle tinted background + --border-2 outline bar
+          bars += `<rect x="${slotX.toFixed(1)}" y="${pad.top}" width="${slotW.toFixed(1)}" height="${chartH}" fill="var(--border)" opacity="0.15"/>`;
+          const bh = Math.max(1, (w.plannedSpend / maxVal) * chartH);
+          bars += `<rect x="${bx.toFixed(1)}" y="${yScale(w.plannedSpend).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="none" stroke="var(--border-2)" stroke-width="1.5" rx="3"/>`;
         } else {
-          const barH = Math.max(1, (w.actualSpend / maxVal) * chartH);
-          const barY = yScale(w.actualSpend);
-          bars += `<rect x="${bx.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" fill="${w.barColor}" rx="3" opacity="0.88"/>`;
+          const bh = Math.max(1, (w.actualSpend / maxVal) * chartH);
+          bars += `<rect x="${bx.toFixed(1)}" y="${yScale(w.actualSpend).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${w.barColor}" rx="3" opacity="0.88"/>`;
+        }
+
+        // Planned dashed line spans full slot width; label at right edge for non-future
+        if (w.plannedSpend > 0) {
           const planY = yScale(w.plannedSpend).toFixed(1);
-          bars += `<line x1="${(bx - 4).toFixed(1)}" y1="${planY}" x2="${(bx + barW + 4).toFixed(1)}" y2="${planY}" stroke="var(--planned)" stroke-width="2.5" stroke-linecap="round"/>`;
-          bars += `<text x="${cx.toFixed(1)}" y="${(parseFloat(planY) - 4).toFixed(1)}" text-anchor="middle" fill="var(--planned)" font-size="9" font-weight="600">${money(w.plannedSpend)}</text>`;
+          bars += `<line x1="${slotX.toFixed(1)}" y1="${planY}" x2="${(slotX + slotW).toFixed(1)}" y2="${planY}" stroke="var(--planned)" stroke-width="2" stroke-dasharray="5 3"/>`;
+          if (!w.isFuture) {
+            bars += `<text x="${(slotX + slotW - 2).toFixed(1)}" y="${(parseFloat(planY) - 3).toFixed(1)}" text-anchor="end" fill="var(--planned)" font-size="9" font-weight="600">${money(w.plannedSpend)}</text>`;
+          }
+        }
+
+        // Phase divider after pre-campaign bar
+        if (w.isPreCampaign) {
+          const divX = (slotX + slotW).toFixed(1);
+          bars += `<line x1="${divX}" y1="${pad.top}" x2="${divX}" y2="${pad.top + chartH}" stroke="var(--border-2)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
         }
 
         // Rotated x label
-        const labelX = cx.toFixed(1);
-        const labelY = (svgH - pad.bottom + 12).toFixed(1);
-        bars += `<text transform="translate(${labelX},${labelY}) rotate(-38)" text-anchor="end" fill="#6b7280" font-size="9">${w.label.split('–')[0]}</text>`;
+        bars += `<text transform="translate(${cx.toFixed(1)},${(svgH - pad.bottom + 12).toFixed(1)}) rotate(-38)" text-anchor="end" fill="var(--muted)" font-size="9">${w.label.split('–')[0]}</text>`;
       });
 
       host.innerHTML = `<svg viewBox="0 0 ${svgW} ${svgH}" class="weekly-chart-svg" role="img" aria-label="Weekly spend bar chart">
-        ${gridLines}${axisLine}${bars}
+        ${yLabel}${gridLines}${axisLine}${bars}
       </svg>`;
+
+      // Cumulative variance strip
+      const strip = $('weeklyVarianceStrip');
+      if (strip) {
+        const delta = cumActual - cumPlanned;
+        if (cumPlanned > 0 && pastWeekCount > 0) {
+          const sign   = delta >= 0 ? '+' : '−';
+          const cls    = delta >= 0 ? 'bad' : (Math.abs(delta / cumPlanned) > 0.1 ? 'warn' : 'good');
+          const clrMap = { good: 'var(--good)', warn: 'var(--warn)', bad: 'var(--bad)' };
+          const dir    = delta <= 0 ? 'under' : 'over';
+          strip.innerHTML = `<strong style="color:${clrMap[cls]}">${sign}${money(Math.abs(delta))}</strong> cumulative variance · ${pastWeekCount} week${pastWeekCount !== 1 ? 's' : ''} ${dir} plan`;
+        } else {
+          strip.textContent = '';
+        }
+      }
     }
 
-    // ── Feature 8: DSPolitical Payment Tracker ────────────────────────────────
+    // ── Feature 8: DSPolitical Payment Tracker — action queue ────────────────
 
     function renderDSPTracker(campaignRows, totalsRow) {
       const today = new Date();
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-      const dspRows  = campaignRows.filter(r => r.dspCommitment > 0);
+      const dspRows   = campaignRows.filter(r => r.dspCommitment > 0)
+                                    .sort((a, b) => (a.date || 0) - (b.date || 0));
       const container = $('dspPaymentRows');
       container.innerHTML = '';
 
-      let totalCommitted = 0;
-      let totalPaid      = 0;
+      if (!dspRows.length) {
+        $('dspSummaryHead').textContent = 'No commitments';
+        $('dspSummaryPct').textContent  = '';
+        $('dspProgressFill').style.width = '0%';
+        $('dspNext').classList.add('hidden');
+        container.innerHTML = '<div class="muted" style="padding:12px 0;">No DSPolitical commitments found in sheet (column L).</div>';
+        return;
+      }
 
-      dspRows.forEach((row) => {
+      // Tally paid/committed
+      let totalCommitted = 0, totalPaid = 0;
+      const tagged = dspRows.map(row => {
         const paid = getDSPPaymentStatus(row.sheetRow, campaignRows, todayDate);
         totalCommitted += row.dspCommitment;
         if (paid) totalPaid += row.dspCommitment;
-
-        const dateLabel = row.date ? toMMDDYYYY(row.date) : (row.label || `Sheet row ${row.sheetRow}`);
-        const div = document.createElement('div');
-        div.className = 'dsp-payment-row';
-        div.innerHTML = `
-          <div>
-            <div style="font-weight:600;font-size:1rem;">${money(row.dspCommitment)}</div>
-            <div class="muted" style="font-size:0.84rem;">${dateLabel}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span class="status-badge ${paid ? 'badge-paid' : 'badge-unpaid'}" id="dspBadge_${row.sheetRow}">${paid ? 'PAID' : 'UNPAID'}</span>
-            <button class="dsp-toggle-btn" data-row="${row.sheetRow}">Toggle</button>
-          </div>`;
-        div.querySelector('.dsp-toggle-btn').addEventListener('click', () => {
-          const key     = `dsp_payment_${row.sheetRow}`;
-          const current = getDSPPaymentStatus(row.sheetRow, campaignRows, todayDate);
-          localStorage.setItem(key, current ? 'unpaid' : 'paid');
-          if (_lastRenderData) renderDSPTracker(_lastRenderData.campaignRows, _lastRenderData.totalsRow);
-        });
-        container.appendChild(div);
+        return { row, paid };
       });
 
-      if (!dspRows.length) {
-        container.innerHTML = '<div class="muted" style="padding:12px 0;">No DSPolitical commitments found in sheet (column L).</div>';
+      // Header summary + progress bar
+      const paidPct = totalCommitted > 0 ? (totalPaid / totalCommitted) * 100 : 0;
+      $('dspSummaryHead').innerHTML = `<strong>${money(totalPaid)}</strong> paid of ${money(totalCommitted)} committed`;
+      $('dspSummaryPct').textContent = `${paidPct.toFixed(0)}%`;
+      $('dspProgressFill').style.width = `${paidPct.toFixed(1)}%`;
+
+      // Next unpaid callout
+      const nextEl    = $('dspNext');
+      const nextEntry = tagged.find(({ paid, row }) => !paid && row.date);
+      if (nextEntry) {
+        const daysUntil = daysBetween(todayDate, nextEntry.row.date);
+        const isOverdue = daysUntil < 0;
+        nextEl.className = `dsp-next${isOverdue ? ' dsp-next--warn' : ''}`;
+        nextEl.classList.remove('hidden');
+        const when = isOverdue
+          ? `${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? 's' : ''} overdue`
+          : daysUntil === 0 ? 'due today'
+          : `due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`;
+        nextEl.innerHTML = `Next payment: <strong>${money(nextEntry.row.dspCommitment)}</strong> — ${when} (${toMMDDYYYY(nextEntry.row.date)})`;
+      } else {
+        nextEl.classList.add('hidden');
       }
 
-      $('dspTotalCommitted').textContent = money(totalCommitted);
-      $('dspTotalPaid').textContent      = money(totalPaid);
+      // Groups: Paid / Due this month / Upcoming
+      const groupDefs = [
+        { label: 'Paid',           filter: ({ paid })       => paid },
+        { label: 'Due this month', filter: ({ paid, row })  => !paid && row.date && daysBetween(todayDate, row.date) <= 31 },
+        { label: 'Upcoming',       filter: ({ paid, row })  => !paid && (!row.date || daysBetween(todayDate, row.date) > 31) }
+      ];
+
+      groupDefs.forEach(g => {
+        const items = tagged.filter(g.filter);
+        if (!items.length) return;
+
+        const gl = document.createElement('div');
+        gl.className = 'dsp-group-label';
+        gl.textContent = g.label;
+        container.appendChild(gl);
+
+        items.forEach(({ row, paid }) => {
+          const dateLabel = row.date ? toMMDDYYYY(row.date) : (row.label || `Sheet row ${row.sheetRow}`);
+          const div = document.createElement('div');
+          div.className = 'dsp-row';
+          div.innerHTML = `
+            <div>
+              <div class="dsp-row__amount">${money(row.dspCommitment)}</div>
+              <div class="dsp-row__date">${dateLabel}</div>
+            </div>
+            <div class="dsp-row__right">
+              <span class="status-badge ${paid ? 'badge-paid' : 'badge-unpaid'}">${paid ? 'PAID' : 'UNPAID'}</span>
+              <button class="dsp-action-btn" data-row="${row.sheetRow}">${paid ? 'Mark unpaid' : 'Mark paid'}</button>
+            </div>`;
+          div.querySelector('.dsp-action-btn').addEventListener('click', () => {
+            const key     = `dsp_payment_${row.sheetRow}`;
+            const current = getDSPPaymentStatus(row.sheetRow, campaignRows, todayDate);
+            localStorage.setItem(key, current ? 'unpaid' : 'paid');
+            if (_lastRenderData) renderDSPTracker(_lastRenderData.campaignRows, _lastRenderData.totalsRow);
+          });
+          container.appendChild(div);
+        });
+      });
     }
 
     // ── Orchestrator ──────────────────────────────────────────────────────────
@@ -2088,12 +2261,11 @@
       _lastRenderData = data;
       const { campaignRows, totalsRow, preCampaign } = data;
       if (!totalsRow || !campaignRows) return;
-      renderPacingStatus(campaignRows, totalsRow);
-      renderCampaignClock(campaignRows, totalsRow);
+      const pacing = computePacing(data);
+      renderCampaignClock(campaignRows, totalsRow, pacing.state);
       renderProjectedFinalSpend(campaignRows, totalsRow);
-      renderDataFreshness(campaignRows, preCampaign);
       renderChannelBudgetTable(campaignRows, totalsRow);
-      renderCumulativeVsPlanChart(campaignRows, totalsRow, preCampaign);
+      renderCumulativeVsPlanChart(campaignRows, totalsRow, preCampaign, pacing.state);
       renderWeeklyBarChart(campaignRows, totalsRow, preCampaign);
       renderDSPTracker(campaignRows, totalsRow);
     }
