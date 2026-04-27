@@ -1213,6 +1213,7 @@
       GOOGLE_SEARCH_BUDGET: 2,
       GOOGLE_CUM_ACTUAL: 3,
       META_CUM_ACTUAL: 4,
+      META_TOTAL_BUDGET: 7,
       META_VOTER_FILE: 9,
       META_BOOSTED: 10,
       DSPOLITICAL: 11,
@@ -1235,6 +1236,7 @@
           googleSearchBudget: parseMoney(r[COL.GOOGLE_SEARCH_BUDGET]),
           googleCum: parseMoney(r[COL.GOOGLE_CUM_ACTUAL]),
           metaCum: parseMoney(r[COL.META_CUM_ACTUAL]),
+          metaTotalBudget: parseMoney(r[COL.META_TOTAL_BUDGET]),
           metaVoterFile: parseMoney(r[COL.META_VOTER_FILE]),
           metaBoosted: parseMoney(r[COL.META_BOOSTED]),
           dspCommitment: parseMoney(r[COL.DSPOLITICAL]),
@@ -1477,7 +1479,7 @@
       const burnRate7      = get7DayBurnRate(campaignRows, lastActualDate);
 
       const googleAlloc  = totalsRow.googleDisplayBudget + totalsRow.googleSearchBudget;
-      const metaAlloc    = totalsRow.metaVoterFile + totalsRow.metaBoosted;
+      const metaAlloc    = totalsRow.metaTotalBudget || (totalsRow.metaVoterFile + totalsRow.metaBoosted);
       const dspAlloc     = totalsRow.dspCommitment;
       const googleSpent  = totalsRow.googleCum || 0;
       const metaSpent    = totalsRow.metaCum || 0;
